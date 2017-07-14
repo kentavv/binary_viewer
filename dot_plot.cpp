@@ -196,28 +196,28 @@ void DotPlot::parameters_changed() {
   pts_i = pts.size();
   random_shuffle(pts.begin(), pts.end());
 
-  for(int i=0; i < pts_i; i++) {
+  // pts_i is decremented in advance_mat()
+  while(pts_i > 0) {
     advance_mat();
   }
   regen_image();
 }
 
 void DotPlot::advance_mat() {
-  int mwh = min(width(), height());
-
-  long mdw = min(dat_n_, (long)width_->value());
-  
-  if(mwh > mdw) mwh = mdw;
-
-  float sf = 1.;
-  if(mwh < mdw) {
-    sf = mwh / float(mdw);
-  }
-
   if(pts_i == 0 || pts.empty()) return;
 
   pts_i--;
   pair<int, int> pt = pts[pts_i];
+
+  int mwh = min(width(), height());
+  float sf = 1.;
+  {
+    long mdw = min(dat_n_, (long)width_->value());
+    if(mwh > mdw) mwh = mdw;
+    if(mwh < mdw) {
+      sf = mwh / float(mdw);
+    }
+  }
 
   int x = pt.first;
   int y = pt.second;
