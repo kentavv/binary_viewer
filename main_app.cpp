@@ -37,6 +37,7 @@
 #include "image_view3.h"
 #include "dot_plot.h"
 #include "view_3d.h"
+#include "graph_view.h"
 
 using std::min;
 
@@ -58,7 +59,7 @@ MainApp::MainApp(QWidget *p)
 
   iv1_ = new ImageView;
   iv2_ = new ImageView;
-  iv2e_ = new ImageView;
+  iv2e_ = new GraphView;
   v3d_ = new View3D;
   iv2d_ = new ImageView2;
   iv2d2_ = new ImageView3;
@@ -158,10 +159,12 @@ void MainApp::update_views(bool update_iv1) {
   if(update_iv1) iv1_->set_data(bin_ + 0, bin_len_);
   iv2_->set_data(bin_ + start_, end_-start_);
   {
-    int bs = 1024;
+    //int bs = 1024;
+    int bs = 256;
+    //int bs = 1;
     int n = (end_-start_) / bs + 1;
-    unsigned  char *dd = new unsigned char[n];
-    memset(dd, 0, n);
+    float *dd = new float[n];
+    memset(dd, 0, n*sizeof(float));
     {
       for(long is=start_; is<end_; is+=bs) {
         long ie = min(end_, is+bs);
@@ -183,7 +186,7 @@ void MainApp::update_views(bool update_iv1) {
           //printf("%d %d %d %d\n", is, bs, is/bs, n);
           continue;
         }
-        dd[di] = min(int(entropy * 255), 255);
+        dd[di] = entropy;
       }
     }
     iv2e_->set_data(dd, n);

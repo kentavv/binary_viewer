@@ -32,6 +32,7 @@ class ImageView2;
 class ImageView3;
 class DotPlot;
 class View3D;
+class GraphView;
 
 class MainApp : public QDialog {
   Q_OBJECT
@@ -52,7 +53,7 @@ protected slots:
 protected:
   ImageView *iv1_;
   ImageView *iv2_;
-  ImageView *iv2e_;
+  GraphView *iv2e_;
   ImageView2 *iv2d_;
   ImageView3 *iv2d2_;
   DotPlot *dot_plot_;
