@@ -32,7 +32,7 @@ using std::max;
 
 GraphView::GraphView(QWidget *p)
   : QLabel(p),
-    m1_(0.), m2_(1.), s_(none), allow_selection_(true)
+    m1_(0.), m2_(1.), ind_(0), s_(none), allow_selection_(true)
 {
 }
 
@@ -44,8 +44,8 @@ void GraphView::enableSelection(bool v) {
   update();
 }
 
-void GraphView::setImage(QImage &img) { 
-  img_ = img;
+void GraphView::setImage(int ind, QImage &img) { 
+  img_[ind] = img;
 
   update_pix();
 
@@ -53,6 +53,11 @@ void GraphView::setImage(QImage &img) {
 }
 
 void GraphView::set_data(const float *dat, long len) {
+  ind_ = 0;
+  set_data(0, dat, len);
+}
+
+void GraphView::set_data(int ind, const float *dat, long len) {
   int w = width();
   int h = height();
  
@@ -62,7 +67,10 @@ void GraphView::set_data(const float *dat, long len) {
     mn = min(mn, dat[i]);
     mx = max(mx, dat[i]);
   }
-
+  if(mn == mx) {
+    mn -= .5;
+    mx += .5;
+  }
   {
     QImage img(w, h, QImage::Format_RGB32);
     img.fill(0);
@@ -94,7 +102,7 @@ void GraphView::set_data(const float *dat, long len) {
         pc = c;
       }
       unsigned char r = 20;
-      unsigned char g = c;
+      unsigned char g = min(c+60, 255);
       unsigned char b = 20;
       unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
       p[i * w + x] = v;
@@ -103,7 +111,7 @@ void GraphView::set_data(const float *dat, long len) {
     delete[] acc;
     delete[] cnt;
 
-    setImage(img);
+    setImage(ind, img);
   }
 }
 
@@ -138,7 +146,7 @@ void GraphView::resizeEvent(QResizeEvent *e) {
 void GraphView::update_pix() {
   int vw = width();
   int vh = height();
-  pix_ = QPixmap::fromImage(img_).scaled(vw, vh); //, Qt::KeepAspectRatio);
+  pix_ = QPixmap::fromImage(img_[ind_]).scaled(vw, vh); //, Qt::KeepAspectRatio);
   setPixmap(pix_);
 }
 
@@ -219,6 +227,12 @@ void GraphView::mouseMoveEvent(QMouseEvent *e) {
 void GraphView::mouseReleaseEvent(QMouseEvent *e) {
   e->accept();
   
+  if(e->button() == Qt::RightButton) {
+    ind_ = (ind_ + 1) % 2;
+    update_pix();
+    update();
+  }
+
   if(e->button() != Qt::LeftButton) return;
 
   int x = e->pos().x();

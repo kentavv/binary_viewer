@@ -36,14 +36,15 @@ public:
   ~GraphView();
 
 public slots:
-  void setImage(QImage &img);
+  void setImage(int ind, QImage &img);
   void set_data(const float *bin, long len);
+  void set_data(int ind, const float *bin, long len);
   void enableSelection(bool);
   
 protected slots:
 
 protected:
-  QImage img_;
+  QImage img_[2];
   QPixmap pix_;
 
   void paintEvent(QPaintEvent *);
@@ -56,6 +57,7 @@ protected:
 
   float m1_, m2_;
   int px_, py_;
+  int ind_;
   enum {none, m1_moving, m2_moving, m12_moving} s_;
   bool allow_selection_;
   
