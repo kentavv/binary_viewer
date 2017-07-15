@@ -52,25 +52,30 @@ void GraphView::setImage(int ind, QImage &img) {
   update();
 }
 
-void GraphView::set_data(const float *dat, long len) {
+void GraphView::set_data(const float *dat, long len, bool normalize) {
   ind_ = 0;
-  set_data(0, dat, len);
+  set_data(0, dat, len, normalize);
 }
 
-void GraphView::set_data(int ind, const float *dat, long len) {
+void GraphView::set_data(int ind, const float *dat, long len, bool normalize) {
   int w = width();
   int h = height();
- 
-  float mn = 99999999.;
-  float mx = -99999999.;
-  for(int i=0; i<len; i++) {
-    mn = min(mn, dat[i]);
-    mx = max(mx, dat[i]);
+
+  float mn = 0.;
+  float mx = 1.;
+  if(normalize) {
+    mn = 99999999.;
+    mx = -99999999.;
+    for(int i=0; i<len; i++) {
+      mn = min(mn, dat[i]);
+      mx = max(mx, dat[i]);
+    }
+    if(mn == mx) {
+      mn -= .5;
+      mx += .5;
+    }
   }
-  if(mn == mx) {
-    mn -= .5;
-    mx += .5;
-  }
+
   {
     QImage img(w, h, QImage::Format_RGB32);
     img.fill(0);
