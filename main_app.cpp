@@ -161,7 +161,7 @@ void MainApp::update_views(bool update_iv1) {
   if(update_iv1) iv1_->set_data(bin_ + 0, bin_len_);
   iv2_->set_data(bin_ + start_, end_-start_);
 
-  // calculate entropy and histogram
+  // calculate entropy
   {
     //int bs = 1024;
     int bs = 256;
@@ -193,7 +193,27 @@ void MainApp::update_views(bool update_iv1) {
         dd[di] = entropy;
       }
     }
-    iv2e_->set_data(dd, n);
+    iv2e_->set_data(0, dd, n);
+    delete[] dd;
+  }
+
+  // calculate histogram
+  {
+    float *dd = new float[256];
+    memset(dd, 0, 256*sizeof(float));
+    {
+      for(long is=start_; is<end_; is++) {
+        dd[bin_[is]]++;
+      }
+      //float mx = 0.;
+      //for(int i=0; i<256; i++) {
+      //  mx = max(mx, dd[i]);
+      //}
+      //for(int i=0; i<256; i++) {
+      //  dd[i] /= mx;
+      //}
+    }
+    iv2e_->set_data(1, dd, 256);
     delete[] dd;
   }
 
