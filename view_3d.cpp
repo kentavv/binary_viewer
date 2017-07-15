@@ -40,7 +40,7 @@ using std::isinf;
 
 
 View3D::View3D(QWidget *p)
-  : QGLWidget(p), hist_(NULL), dat_(NULL), dat_n_(0)
+  : QGLWidget(p), hist_(NULL), dat_(NULL), dat_n_(0), spinning_(true)
 {
   QTimer *update_timer = new QTimer(this);
   QObject::connect(update_timer, SIGNAL(timeout()), this, SLOT(updateGL())); //, Qt::QueuedConnection);
@@ -387,8 +387,10 @@ void View3D::paintGL() {
   glDisableClientState(GL_COLOR_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
 
-  alpha = alpha + 0.1 * 20;
-  alpha2 = alpha2 + 0.01 * 20;
+  if(spinning_) {
+    alpha = alpha + 0.1 * 20;
+    alpha2 = alpha2 + 0.01 * 20;
+  }
 
   glFlush();
 }
@@ -467,3 +469,17 @@ void View3D::parameters_changed() {
 
   updateGL();
 }
+
+void View3D::mousePressEvent(QMouseEvent *e) {
+  e->accept();
+}
+
+void View3D::mouseMoveEvent(QMouseEvent *e) {
+  e->accept();
+}
+
+void View3D::mouseReleaseEvent(QMouseEvent *e) {
+  e->accept();
+  spinning_ = !spinning_;
+}
+

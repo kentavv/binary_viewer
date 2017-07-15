@@ -48,6 +48,9 @@ protected:
   void initializeGL();
   void resizeGL(int w, int h);
   void paintGL();
+  void mousePressEvent(QMouseEvent *event);
+  void mouseMoveEvent(QMouseEvent *event);
+  void mouseReleaseEvent(QMouseEvent *event);
   
   typedef enum {none, u8, u12, u16, u32, u64, f32, f64 } dtype_t;
   int *generate_histo(const unsigned char*, long int, dtype_t);
@@ -58,6 +61,7 @@ protected:
   int *hist_;
   const unsigned char *dat_;
   long dat_n_;
+  bool spinning_;
 };
 
 #endif
