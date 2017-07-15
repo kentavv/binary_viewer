@@ -22,47 +22,13 @@
  * SOFTWARE.
  */
 
-#ifndef _IMAGE_VIEW2_H_
-#define _IMAGE_VIEW2_H_
+#ifndef _HISTOGRAM_H_
+#define _HISTOGRAM_H_
 
-#include <QLabel>
-#include <QImage>
-#include <QPixmap>
+typedef enum {none, u8, u16, u32, u64, f32, f64 } histo_dtype_t;
 
-class QSpinBox;
-class QComboBox;
-
-class ImageView2 : public QLabel {
-  Q_OBJECT
-public:
-  ImageView2(QWidget *p=NULL);
-  ~ImageView2();
-
-public slots:
-  void setData(const unsigned char *dat, long n);
-  void parameters_changed();
-
-protected slots:
-  void setImage(QImage &img);
-  void regen_histo();
-
-protected:
-  QImage img_;
-  QPixmap pix_;
-
-  void paintEvent(QPaintEvent *);
-  void resizeEvent(QResizeEvent *e);
-
-  void update_pix();
-
-  QSpinBox *thresh_, *scale_;
-  QComboBox *type_;
-  int *hist_;
-  const unsigned char *dat_;
-  long dat_n_;
-  
-signals:
-  void rangeSelected(float, float);
-};
+int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype);
+float *generate_histo(const unsigned char *dat_u8, long n);
+float *generate_entropy(const unsigned char *dat_u8, long n, long &rv_len, int bs=256);
 
 #endif

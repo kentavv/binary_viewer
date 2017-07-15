@@ -30,6 +30,7 @@
 #include <QComboBox>
 
 #include "image_view2.h"
+#include "histogram.h"
 
 using std::isnan;
 using std::signbit;
@@ -135,130 +136,6 @@ void ImageView2::update_pix() {
   setPixmap(pix_);
 }
 
-template<class T> void hist_float_helper_2d(int *hist, T *dat_f, long n) {
-  for(long i=0; i<n/long(sizeof(T))-1; i++) {
-    int a1;
-    int a2;
-    if(sizeof(T) == 4) {
-      a1 = ((dat_f[i+0] / FLT_MAX) * 255. + 255.) / 2.;
-      a2 = ((dat_f[i+1] / FLT_MAX) * 255. + 255.) / 2.;
-    } else if(sizeof(T) == 8) {
-      a1 = ((dat_f[i+0] / DBL_MAX) * 255. + 255.) / 2.;
-      a2 = ((dat_f[i+1] / DBL_MAX) * 255. + 255.) / 2.;
-    } else {
-      abort();
-    }
-    
-    if(isnan(dat_f[i+0])) a1 = 255;
-    if(isnan(dat_f[i+1])) a2 = 255;
-    
-    if(isnan(dat_f[i+0])) { if(signbit(dat_f[i+0])) { a1 = 0; } else { a1 = 255; } }
-    if(isnan(dat_f[i+1])) { if(signbit(dat_f[i+1])) { a2 = 0; } else { a2 = 255; } } 
-    
-    if(isinf(dat_f[i+0])) { if(signbit(dat_f[i+0])) { a1 = 0; } else { a1 = 255; } }
-    if(isinf(dat_f[i+1])) { if(signbit(dat_f[i+1])) { a2 = 0; } else { a2 = 255; } } 
-   
-#if 0 
-    if(a1 < 0 || a1 > 255) {
-      printf("0 %d %f\n", a1, dat_f[i+0]);
-    }
-    if(a2 < 0 || a2 > 255) {
-      printf("1 %d %f %d %d\n", a2, dat_f[i+1], isnan(dat_f[i+1]), dat_f[i+1] < 0);
-    }
-#endif
-
-    if(a1 < 0) a1 = 0;
-    if(a2 < 0) a2 = 0;
-    
-    if(a1 > 255) a1 = 255;
-    if(a2 > 255) a2 = 255;
-    
-    hist[a1 * 256 + a2]++;
-  }
-}
-
-int *ImageView2::generate_histo(const unsigned char *dat_u8, long n, dtype_t dtype) {
-  int *hist = new int[256 * 256];
-  memset(hist, 0, sizeof(hist[0]) * 256 * 256);
-
-  switch(dtype) {
-  case none:
-    break;
-  case u8:
-    {
-      for(long i=0; i<n-1; i++) {
-        int a1 = dat_u8[i+0];
-        int a2 = dat_u8[i+1];
-        
-        hist[a1 * 256 + a2]++;
-      }
-    }
-    break;
-  case u16:
-    {
-      const unsigned short *dat_u16 = (const unsigned short*)dat_u8;
-      for(long i=0; i<n/2-1; i++) {
-        int a1 = dat_u16[i+0] / float(0xffff) * 255.;
-        int a2 = dat_u16[i+1] / float(0xffff) * 255.;
-        
-        hist[a1 * 256 + a2]++;
-      }
-    }
-    break;
-  case u32:
-    {
-      const unsigned int *dat_u32 = (const unsigned int*)dat_u8;
-      for(long i=0; i<n/4-1; i++) {
-        int a1 = dat_u32[i+0] / float(0xffffffff) * 255.;
-        int a2 = dat_u32[i+1] / float(0xffffffff) * 255.;
-    
-        hist[a1 * 256 + a2]++;
-      }
-    }
-    break;
-  case u64:
-    {
-      const unsigned long *dat_u64 = (const unsigned long*)dat_u8;
-      for(long i=0; i<n/8-1; i++) {
-        int a1 = dat_u64[i+0] / float(0xffffffffffffffff) * 255.;
-        int a2 = dat_u64[i+1] / float(0xffffffffffffffff) * 255.;
-    
-        hist[a1 * 256 + a2]++;
-      }
-    }
-    break;
-  case f32:
-    {
-      const float *dat_f32 = (const float*)dat_u8;
-      hist_float_helper_2d(hist, dat_f32, n);
-    }
-  case f64:
-    {
-      const double *dat_f64 = (const double*)dat_u8;
-      hist_float_helper_2d(hist, dat_f64, n);
-    }    
-    break;
-  }
- 
-#if 0 
-  int n_vertices = 0;
-  float m=10000000, M=-1, a=0.;
-  for(int i=0; i<256*256; i++) {
-    if(hist[i] > 0) {
-      n_vertices++;
-
-      if(m > hist[i]) m = hist[i];
-      if(M < hist[i]) M = hist[i];
-      a += hist[i];
-    }
-  }
-  a /= n_vertices;
-  printf("%d %f %f %f\n", n_vertices, m, M, a);
-#endif
-
-  return hist;
-}
-
 void ImageView2::setData(const unsigned char *dat, long n) {
   dat_ = dat;
   dat_n_ = n;
@@ -272,7 +149,7 @@ void ImageView2::regen_histo() {
     hist_ = NULL;
   }
 
-  dtype_t t;
+  histo_dtype_t t;
   QString s = type_->currentText();
   if(s == "U8") t = u8;
   else if(s == "U16") t = u16;
@@ -282,7 +159,7 @@ void ImageView2::regen_histo() {
   else if(s == "F64") t = f64;
   else t = none;
 
-  hist_ = generate_histo(dat_, dat_n_, t);
+  hist_ = generate_histo_2d(dat_, dat_n_, t);
 
   parameters_changed();
 }

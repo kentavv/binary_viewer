@@ -40,13 +40,13 @@
 #include "dot_plot.h"
 #include "view_3d.h"
 #include "graph_view.h"
-
-using std::min;
+#include "histogram.h"
 
 extern const QString base_caption;
 extern QString caption;
 
 static int scroller_w = 16*8;
+
 
 MainApp::MainApp(QWidget *p)
   : QDialog(p), bin_(NULL), bin_len_(0), start_(0), end_(0)
@@ -157,64 +157,25 @@ void MainApp::update_views(bool update_iv1) {
 
   if(bin_ == NULL) return;
 
-  // img1 shows the entire file, img2 shows the current segment
+  // iv1 shows the entire file, iv2 shows the current segment
   if(update_iv1) iv1_->set_data(bin_ + 0, bin_len_);
   iv2_->set_data(bin_ + start_, end_-start_);
 
-  // calculate entropy
   {
-    //int bs = 1024;
-    int bs = 256;
-    //int bs = 1;
-    int n = (end_-start_) / bs + 1;
-    float *dd = new float[n];
-    memset(dd, 0, n*sizeof(float));
-    {
-      for(long is=start_; is<end_; is+=bs) {
-        long ie = min(end_, is+bs);
-        int dict[256] = { 0 };
-        for(long i=is; i<ie; i++) {
-          dict[bin_[i]]++;
-        }
-        float entropy = 0.;
-        for(int i=0; i<256; i++) {
-          float p = dict[i] / float(ie - is);
-          if(p > 0.) {
-            entropy += -p * logf(p);
-          }
-        }
-        entropy /= logf(2.0);
-        entropy /= 8.0;
-        int di = (is-start_)/bs;
-        if(di >= n) {
-          //printf("%d %d %d %d\n", is, bs, is/bs, n);
-          continue;
-        }
-        dd[di] = entropy;
-      }
+    long n;
+    float *dd = generate_entropy(bin_ + start_, end_ - start_, n);
+    if(dd != NULL) {
+      iv2e_->set_data(0, dd, n);
+      delete[] dd;
     }
-    iv2e_->set_data(0, dd, n);
-    delete[] dd;
   }
 
-  // calculate histogram
   {
-    float *dd = new float[256];
-    memset(dd, 0, 256*sizeof(float));
-    {
-      for(long is=start_; is<end_; is++) {
-        dd[bin_[is]]++;
-      }
-      //float mx = 0.;
-      //for(int i=0; i<256; i++) {
-      //  mx = max(mx, dd[i]);
-      //}
-      //for(int i=0; i<256; i++) {
-      //  dd[i] /= mx;
-      //}
+    float *dd = generate_histo(bin_ + start_, end_ - start_);
+    if(dd != NULL) {
+      iv2e_->set_data(1, dd, 256, false);
+      delete[] dd;
     }
-    iv2e_->set_data(1, dd, 256);
-    delete[] dd;
   }
 
   if(v3d_->isVisible()) v3d_->setData(bin_+start_, end_-start_);
