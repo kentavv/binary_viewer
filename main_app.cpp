@@ -30,6 +30,8 @@
 #include <ctype.h>
 
 #include <QtGui>
+#include <QHBoxLayout>
+#include <QPushButton>
 
 #include "main_app.h"
 #include "image_view.h"

@@ -26,6 +26,9 @@
 #include <algorithm>
 
 #include <QtGui>
+#include <QGridLayout>
+#include <QSpinBox>
+#include <QComboBox>
 
 #include "dot_plot.h"
 

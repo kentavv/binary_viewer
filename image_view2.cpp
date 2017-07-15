@@ -25,8 +25,16 @@
 #include <cfloat>
 
 #include <QtGui>
+#include <QGridLayout>
+#include <QSpinBox>
+#include <QComboBox>
 
 #include "image_view2.h"
+
+using std::isnan;
+using std::signbit;
+using std::isinf;
+
 
 ImageView2::ImageView2(QWidget *p)
   : QLabel(p),

@@ -23,9 +23,13 @@
  */
 
 #include <QtGui>
+#include <QGridLayout>
+#include <QSpinBox>
+#include <QComboBox>
 
 #include "image_view3.h"
 #include "bayer.h"
+
 
 ImageView3::ImageView3(QWidget *p)
   : QLabel(p),

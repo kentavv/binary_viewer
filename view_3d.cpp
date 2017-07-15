@@ -24,10 +24,20 @@
 
 #include <cfloat>
 #include <QtGui>
+#include <QGridLayout>
+#include <QLabel>
+#include <QSpinBox>
+#include <QComboBox>
+#include <QCheckBox>
 
 #include <GL/glut.h>
 
 #include "view_3d.h"
+
+using std::isnan;
+using std::signbit;
+using std::isinf;
+
 
 View3D::View3D(QWidget *p)
   : QGLWidget(p), hist_(NULL), dat_(NULL), dat_n_(0)
