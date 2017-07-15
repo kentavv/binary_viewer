@@ -3,6 +3,8 @@ Binary Viewer is a tool for binary file discovery using visualizations that may 
 Loosely based on Cantor.Dust, Binary Viewer was developed September 21-October 8, 2015 after seeing a demo of Cantor.Dust but receiving no response regarding availability.
 Since Cantor.Dust was released, another tools have similar functionality and available. Binary Viewer is meant as a reference for those interested but is unlikely to receive active development.
 
+For more information on this and related programs for visualizing binaries see https://www.youtube.com/watch?v=C8--cXwuuFQ&list=PLUyyOw61zxiJXMihb4PjYbGHEgdGxMuY3
+
 To compile Binary Viewer, Qt4 is required.
 
 Since Cantor.Dust was released, another tools have similar functionality and available.
