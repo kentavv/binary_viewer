@@ -197,7 +197,7 @@ float *generate_entropy(const unsigned char *dat_u8, long n, long &rv_len, int b
 
   long ddn = n / inc + (n % inc ? 1 : 0);
   float *dd = new float[ddn];
-  memset(dd, 0, dd[0] * ddn);
+  memset(dd, 0, sizeof(dd[0]) * ddn);
 
   {
     for(long is=0; is<n; is+=inc) {
