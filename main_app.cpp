@@ -1,7 +1,7 @@
 /*
  * MIT License
  * 
- * Copyright (c) 2015 Kent VanderVelden
+ * Copyright (c) 2015, 2017 Kent A. Vander Velden
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -160,6 +160,8 @@ void MainApp::update_views(bool update_iv1) {
   // img1 shows the entire file, img2 shows the current segment
   if(update_iv1) iv1_->set_data(bin_ + 0, bin_len_);
   iv2_->set_data(bin_ + start_, end_-start_);
+
+  // calculate entropy and histogram
   {
     //int bs = 1024;
     int bs = 256;
