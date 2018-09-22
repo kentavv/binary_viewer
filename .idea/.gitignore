@@ -1,0 +1,23 @@
+#.gitignore from https://stackoverflow.com/a/44690814/9910225
+
+# ignore all .idea files ...
+*
+# except  ...
+
+# Version Control configuration
+!vcs.xml
+
+# how IDEA should treat the text files
+!encodings.xml
+
+# automatic code formatting
+!codeStyleSettings.xml
+
+# project specific words
+!dictionaries
+
+!copyrights
+!misc.xml
+!sqldialects.xml
+
+!.gitignore
