@@ -28,40 +28,54 @@
 #include <QGLWidget>
 
 class QSpinBox;
+
 class QComboBox;
+
 class QCheckBox;
 
 class View3D : public QGLWidget {
-  Q_OBJECT
+Q_OBJECT
 public:
-  View3D(QWidget *p=NULL);
-  ~View3D();
+    View3D(QWidget *p = NULL);
+
+    ~View3D();
 
 public slots:
-  void setData(const unsigned char *dat, long n);
-  void parameters_changed();
+
+    void setData(const unsigned char *dat, long n);
+
+    void parameters_changed();
 
 protected slots:
-  void regen_histo();
+
+    void regen_histo();
 
 protected:
-  void initializeGL();
-  void resizeGL(int w, int h);
-  void paintGL();
-  void mousePressEvent(QMouseEvent *event);
-  void mouseMoveEvent(QMouseEvent *event);
-  void mouseReleaseEvent(QMouseEvent *event);
-  
-  typedef enum {none, u8, u12, u16, u32, u64, f32, f64 } dtype_t;
-  int *generate_histo(const unsigned char*, long int, dtype_t);
-  
-  QSpinBox *thresh_, *scale_;
-  QComboBox *type_;
-  QCheckBox *overlap_;
-  int *hist_;
-  const unsigned char *dat_;
-  long dat_n_;
-  bool spinning_;
+    void initializeGL();
+
+    void resizeGL(int w, int h);
+
+    void paintGL();
+
+    void mousePressEvent(QMouseEvent *event);
+
+    void mouseMoveEvent(QMouseEvent *event);
+
+    void mouseReleaseEvent(QMouseEvent *event);
+
+    typedef enum {
+        none, u8, u12, u16, u32, u64, f32, f64
+    } dtype_t;
+
+    int *generate_histo(const unsigned char *, long int, dtype_t);
+
+    QSpinBox *thresh_, *scale_;
+    QComboBox *type_;
+    QCheckBox *overlap_;
+    int *hist_;
+    const unsigned char *dat_;
+    long dat_n_;
+    bool spinning_;
 };
 
 #endif

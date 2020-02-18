@@ -28,50 +28,62 @@
 #include <QDialog>
 
 class ImageView;
+
 class ImageView2;
+
 class ImageView3;
+
 class DotPlot;
+
 class View3D;
+
 class GraphView;
 
 class MainApp : public QDialog {
-  Q_OBJECT
-  public:
-  MainApp(QWidget *p=NULL);
-  ~MainApp();
-  
-  bool load_file(const char *filename);
+Q_OBJECT
+public:
+    MainApp(QWidget *p = NULL);
+
+    ~MainApp();
+
+    bool load_file(const char *filename);
 
 public slots:
-  void reject();
-               
+
+    void reject();
+
 protected slots:
-  void quit();
-  void rangeSelected(float, float);
-  void switchView();
+
+    void quit();
+
+    void rangeSelected(float, float);
+
+    void switchView();
 
 protected:
-  ImageView *iv1_;
-  ImageView *iv2_;
-  GraphView *iv2e_;
-  ImageView2 *iv2d_;
-  ImageView3 *iv2d2_;
-  DotPlot *dot_plot_;
-  View3D *v3d_;
+    ImageView *iv1_;
+    ImageView *iv2_;
+    GraphView *iv2e_;
+    ImageView2 *iv2d_;
+    ImageView3 *iv2d2_;
+    DotPlot *dot_plot_;
+    View3D *v3d_;
 
-  unsigned char *bin_;
-  long bin_len_;
-  
-  bool done_flag_;
+    unsigned char *bin_;
+    long bin_len_;
 
-  QString euid;
+    bool done_flag_;
 
-  long start_;
-  long end_;
-  
-  void updatePositions(bool resized=false);
-  void resizeEvent(QResizeEvent *e);
-  void update_views(bool update_iv1 = true);
+    QString euid;
+
+    long start_;
+    long end_;
+
+    void updatePositions(bool resized = false);
+
+    void resizeEvent(QResizeEvent *e);
+
+    void update_views(bool update_iv1 = true);
 };
 
 #endif

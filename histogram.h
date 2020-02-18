@@ -25,10 +25,14 @@
 #ifndef _HISTOGRAM_H_
 #define _HISTOGRAM_H_
 
-typedef enum {none, u8, u16, u32, u64, f32, f64 } histo_dtype_t;
+typedef enum {
+    none, u8, u16, u32, u64, f32, f64
+} histo_dtype_t;
 
 int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype);
+
 float *generate_histo(const unsigned char *dat_u8, long n);
-float *generate_entropy(const unsigned char *dat_u8, long n, long &rv_len, int bs=256);
+
+float *generate_entropy(const unsigned char *dat_u8, long n, long &rv_len, int bs = 256);
 
 #endif

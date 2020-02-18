@@ -33,21 +33,21 @@ QString caption = base_caption;
 //----------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
-  QApplication app(argc, argv);
+    QApplication app(argc, argv);
 
-  MainApp a;
+    MainApp a;
 
-  if(argc != 2) {
-    fprintf(stderr, "usage: %s <filename>\n", argv[0]);
-    exit(EXIT_FAILURE);
-  }
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s <filename>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
 
-  if(!a.load_file(argv[1])) {
-    exit(EXIT_FAILURE);
-  }
+    if (!a.load_file(argv[1])) {
+        exit(EXIT_FAILURE);
+    }
 
-  a.showFullScreen();
-  a.setWindowTitle(base_caption);
+    a.showFullScreen();
+    a.setWindowTitle(base_caption);
 
-  return a.exec();
+    return a.exec();
 }

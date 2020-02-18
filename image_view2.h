@@ -30,39 +30,47 @@
 #include <QPixmap>
 
 class QSpinBox;
+
 class QComboBox;
 
 class ImageView2 : public QLabel {
-  Q_OBJECT
+Q_OBJECT
 public:
-  ImageView2(QWidget *p=NULL);
-  ~ImageView2();
+    ImageView2(QWidget *p = NULL);
+
+    ~ImageView2();
 
 public slots:
-  void setData(const unsigned char *dat, long n);
-  void parameters_changed();
+
+    void setData(const unsigned char *dat, long n);
+
+    void parameters_changed();
 
 protected slots:
-  void setImage(QImage &img);
-  void regen_histo();
+
+    void setImage(QImage &img);
+
+    void regen_histo();
 
 protected:
-  QImage img_;
-  QPixmap pix_;
+    QImage img_;
+    QPixmap pix_;
 
-  void paintEvent(QPaintEvent *);
-  void resizeEvent(QResizeEvent *e);
+    void paintEvent(QPaintEvent *);
 
-  void update_pix();
+    void resizeEvent(QResizeEvent *e);
 
-  QSpinBox *thresh_, *scale_;
-  QComboBox *type_;
-  int *hist_;
-  const unsigned char *dat_;
-  long dat_n_;
-  
+    void update_pix();
+
+    QSpinBox *thresh_, *scale_;
+    QComboBox *type_;
+    int *hist_;
+    const unsigned char *dat_;
+    long dat_n_;
+
 signals:
-  void rangeSelected(float, float);
+
+    void rangeSelected(float, float);
 };
 
 #endif

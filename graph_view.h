@@ -30,39 +30,51 @@
 #include <QPixmap>
 
 class GraphView : public QLabel {
-  Q_OBJECT
+Q_OBJECT
 public:
-  GraphView(QWidget *p=NULL);
-  ~GraphView();
+    GraphView(QWidget *p = NULL);
+
+    ~GraphView();
 
 public slots:
-  void setImage(int ind, QImage &img);
-  void set_data(const float *bin, long len, bool normalize=true);
-  void set_data(int ind, const float *bin, long len, bool normalize=true);
-  void enableSelection(bool);
-  
+
+    void setImage(int ind, QImage &img);
+
+    void set_data(const float *bin, long len, bool normalize = true);
+
+    void set_data(int ind, const float *bin, long len, bool normalize = true);
+
+    void enableSelection(bool);
+
 protected slots:
 
 protected:
-  QImage img_[2];
-  QPixmap pix_;
+    QImage img_[2];
+    QPixmap pix_;
 
-  void paintEvent(QPaintEvent *);
-  void resizeEvent(QResizeEvent *e);
-  void mousePressEvent(QMouseEvent *event);
-  void mouseMoveEvent(QMouseEvent *event);
-  void mouseReleaseEvent(QMouseEvent *event);
+    void paintEvent(QPaintEvent *);
 
-  void update_pix();
+    void resizeEvent(QResizeEvent *e);
 
-  float m1_, m2_;
-  int px_, py_;
-  int ind_;
-  enum {none, m1_moving, m2_moving, m12_moving} s_;
-  bool allow_selection_;
-  
+    void mousePressEvent(QMouseEvent *event);
+
+    void mouseMoveEvent(QMouseEvent *event);
+
+    void mouseReleaseEvent(QMouseEvent *event);
+
+    void update_pix();
+
+    float m1_, m2_;
+    int px_, py_;
+    int ind_;
+    enum {
+        none, m1_moving, m2_moving, m12_moving
+    } s_;
+    bool allow_selection_;
+
 signals:
-  void rangeSelected(float, float);
+
+    void rangeSelected(float, float);
 };
 
 #endif

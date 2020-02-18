@@ -32,35 +32,43 @@
 class QSpinBox;
 
 class DotPlot : public QLabel {
-  Q_OBJECT
+Q_OBJECT
 public:
-  DotPlot(QWidget *p=NULL);
-  ~DotPlot();
+    DotPlot(QWidget *p = NULL);
+
+    ~DotPlot();
 
 public slots:
-  void setData(const unsigned char *dat, long n);
-  void parameters_changed();
-  
-protected slots:
-  void setImage(QImage &img);
 
-  void advance_mat();
-  void regen_image();
+    void setData(const unsigned char *dat, long n);
+
+    void parameters_changed();
+
+protected slots:
+
+    void setImage(QImage &img);
+
+    void advance_mat();
+
+    void regen_image();
 
 protected:
-  QImage img_;
-  QPixmap pix_;
+    QImage img_;
+    QPixmap pix_;
 
-  void paintEvent(QPaintEvent *);
-  void resizeEvent(QResizeEvent *e);
+    void paintEvent(QPaintEvent *);
 
-  void update_pix();
+    void resizeEvent(QResizeEvent *e);
 
-  typedef enum {none, rgb8, rgb16, rgba8, rgba16, bgr8, bgr16, bgra8, bgra16, grey8, grey16 } dtype_t;
+    void update_pix();
 
-  QSpinBox *offset1_, *offset2_, *width_, *max_samples_;
-  const unsigned char *dat_;
-  long dat_n_;
+    typedef enum {
+        none, rgb8, rgb16, rgba8, rgba16, bgr8, bgr16, bgra8, bgra16, grey8, grey16
+    } dtype_t;
+
+    QSpinBox *offset1_, *offset2_, *width_, *max_samples_;
+    const unsigned char *dat_;
+    long dat_n_;
 };
 
 #endif

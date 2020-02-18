@@ -30,63 +30,71 @@
 #include <QPixmap>
 
 class QSpinBox;
+
 class QComboBox;
 
 class ImageView3 : public QLabel {
-  Q_OBJECT
+Q_OBJECT
 public:
-  ImageView3(QWidget *p=NULL);
-  ~ImageView3();
+    ImageView3(QWidget *p = NULL);
+
+    ~ImageView3();
 
 public slots:
-  void setData(const unsigned char *dat, long n);
-  void parameters_changed();
-  
+
+    void setData(const unsigned char *dat, long n);
+
+    void parameters_changed();
+
 protected slots:
-  void setImage(QImage &img);
-  void regen_image();
-  
+
+    void setImage(QImage &img);
+
+    void regen_image();
+
 protected:
-  QImage img_;
-  QPixmap pix_;
+    QImage img_;
+    QPixmap pix_;
 
-  void paintEvent(QPaintEvent *);
-  void resizeEvent(QResizeEvent *e);
+    void paintEvent(QPaintEvent *);
 
-  void update_pix();
+    void resizeEvent(QResizeEvent *e);
 
-  typedef enum {none, rgb8, rgb12, rgb16, rgba8, rgba12, rgba16, bgr8, bgr12, bgr16, bgra8, bgra12, bgra16, grey8, grey12, grey16,
-		bayer8_0,
-		bayer8_1,
-		bayer8_2,
-		bayer8_3,
-		bayer8_4,
-		bayer8_5,
-		bayer8_6,
-		bayer8_7,
-		bayer8_8,
-		bayer8_9,
-		bayer8_10,
-		bayer8_11,
-		bayer8_12,
-		bayer8_13,
-		bayer8_14,
-		bayer8_15,
-		bayer8_16,
-		bayer8_17,
-		bayer8_18,
-		bayer8_19,
-		bayer8_20,
-		bayer8_21,
-		bayer8_22,
-		bayer8_23
-  } dtype_t;
+    void update_pix();
 
-  QSpinBox *offset_, *width_;
-  QComboBox *type_;
-  const unsigned char *dat_;
-  long dat_n_;
-  bool inverted_;
+    typedef enum {
+        none, rgb8, rgb12, rgb16, rgba8, rgba12, rgba16, bgr8, bgr12, bgr16, bgra8, bgra12, bgra16, grey8, grey12, grey16,
+        bayer8_0,
+        bayer8_1,
+        bayer8_2,
+        bayer8_3,
+        bayer8_4,
+        bayer8_5,
+        bayer8_6,
+        bayer8_7,
+        bayer8_8,
+        bayer8_9,
+        bayer8_10,
+        bayer8_11,
+        bayer8_12,
+        bayer8_13,
+        bayer8_14,
+        bayer8_15,
+        bayer8_16,
+        bayer8_17,
+        bayer8_18,
+        bayer8_19,
+        bayer8_20,
+        bayer8_21,
+        bayer8_22,
+        bayer8_23
+    } dtype_t;
+
+    QSpinBox *offset_, *width_;
+    QComboBox *type_;
+    const unsigned char *dat_;
+    long dat_n_;
+    bool inverted_;
 };
 
 #endif

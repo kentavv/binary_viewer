@@ -45,172 +45,171 @@
 extern const QString base_caption;
 extern QString caption;
 
-static int scroller_w = 16*8;
+static int scroller_w = 16 * 8;
 
 
 MainApp::MainApp(QWidget *p)
-  : QDialog(p), bin_(NULL), bin_len_(0), start_(0), end_(0)
-{
-  if(1) {
-    QPalette pal = palette();
-    pal.setBrush(QPalette::Background, QBrush(Qt::black));
-    setPalette(pal);
-  }
-  
-  done_flag_ = false;
-
-  iv1_ = new ImageView;
-  iv2_ = new ImageView;
-  iv2e_ = new GraphView;
-  v3d_ = new View3D;
-  iv2d_ = new ImageView2;
-  iv2d2_ = new ImageView3;
-  dot_plot_ = new DotPlot;
-  
-  connect(iv1_, SIGNAL(rangeSelected(float, float)), SLOT(rangeSelected(float, float)));
-
-  iv1_->setFixedWidth(scroller_w);
-  iv2_->setFixedWidth(scroller_w);
-  iv2e_->setFixedWidth(scroller_w);
-
-  iv2_->enableSelection(false);
-  iv2e_->enableSelection(false);
-
-  QHBoxLayout *layout = new QHBoxLayout;
-  layout->addWidget(iv1_);
-  layout->addWidget(iv2_);
-  layout->addWidget(iv2e_);
-  QPushButton *pb = new QPushButton("*");
-  pb->setFixedSize(pb->sizeHint());
-  connect(pb, SIGNAL(clicked()), SLOT(switchView()));
-  layout->addWidget(pb);
-  layout->addWidget(v3d_);
-  layout->addWidget(iv2d_);
-  layout->addWidget(iv2d2_);
-  layout->addWidget(dot_plot_);
-
-  v3d_->show();
-  iv2d_->hide();
-  iv2d2_->hide();
-  dot_plot_->hide();
-  
-  setLayout(layout);
-}
-
-MainApp::~MainApp() {
-  quit();
-}
-
-void MainApp::resizeEvent(QResizeEvent *e){
-  QDialog::resizeEvent(e);
-  update_views();
-}
-
-void MainApp::quit() {
-  if(!done_flag_) {
-    done_flag_ = true;
-
-    exit(EXIT_SUCCESS);
-  }
-}
-
-void MainApp::reject() {
-  quit();
-}
-
-bool MainApp::load_file(const char *filename) {
-  FILE *f = fopen(filename, "rb");
-  if(!f) {
-    fprintf(stderr, "Unable to open %s\n", filename);
-    return false;
-  }
-  fseek(f, 0, SEEK_END);
-  long len = ftell(f);
-  fseek(f, 0, SEEK_SET);
-  
-  if(bin_ != NULL) {
-    delete[] bin_;
-    bin_ = NULL;
-    bin_len_ = 0;
-    start_ = 0;
-    end_ = 0;
-  }
-
-  bin_ = new unsigned char[len];
-  bin_len_ = fread(bin_, 1, len, f);
-  fclose(f);
-
-  if(len != bin_len_) {
-    printf("premature read %ld of %ld\n", bin_len_, len);
-  }
-  
-  start_ = 0;
-  end_ = bin_len_;
-
-  update_views();
-
-  return true;
-}
-
-void MainApp::update_views(bool update_iv1) {
-  if(update_iv1) iv1_->clear();
-
-  if(bin_ == NULL) return;
-
-  // iv1 shows the entire file, iv2 shows the current segment
-  if(update_iv1) iv1_->set_data(bin_ + 0, bin_len_);
-  iv2_->set_data(bin_ + start_, end_-start_);
-
-  {
-    long n;
-    float *dd = generate_entropy(bin_ + start_, end_ - start_, n);
-    if(dd != NULL) {
-      iv2e_->set_data(0, dd, n);
-      delete[] dd;
+        : QDialog(p), bin_(NULL), bin_len_(0), start_(0), end_(0) {
+    if (1) {
+        QPalette pal = palette();
+        pal.setBrush(QPalette::Background, QBrush(Qt::black));
+        setPalette(pal);
     }
-  }
 
-  {
-    float *dd = generate_histo(bin_ + start_, end_ - start_);
-    if(dd != NULL) {
-      iv2e_->set_data(1, dd, 256, false);
-      delete[] dd;
-    }
-  }
+    done_flag_ = false;
 
-  if(v3d_->isVisible()) v3d_->setData(bin_+start_, end_-start_);
-  if(iv2d_->isVisible()) iv2d_->setData(bin_+start_, end_-start_);
-  if(iv2d2_->isVisible()) iv2d2_->setData(bin_+start_, end_-start_);
-  if(dot_plot_->isVisible()) dot_plot_->setData(bin_+start_, end_-start_);
-}
+    iv1_ = new ImageView;
+    iv2_ = new ImageView;
+    iv2e_ = new GraphView;
+    v3d_ = new View3D;
+    iv2d_ = new ImageView2;
+    iv2d2_ = new ImageView3;
+    dot_plot_ = new DotPlot;
 
-void MainApp::rangeSelected(float s, float e) {
-  start_ = s * bin_len_;
-  end_ = e * bin_len_;
-  update_views(false);
-}
+    connect(iv1_, SIGNAL(rangeSelected(float, float)), SLOT(rangeSelected(float, float)));
 
-void MainApp::switchView() {
-  if(v3d_->isVisible()) {
-    v3d_->hide();
-    iv2d_->show();
-    iv2d2_->hide();
-    dot_plot_->hide();
-  } else if(iv2d_->isVisible()) {
-    v3d_->hide();
-    iv2d_->hide();
-    iv2d2_->show();
-    dot_plot_->hide();
-  } else if(iv2d2_->isVisible()) {
-    v3d_->hide();
-    iv2d_->hide();
-    iv2d2_->hide();
-    dot_plot_->show();
-  } else if(dot_plot_->isVisible()) {
+    iv1_->setFixedWidth(scroller_w);
+    iv2_->setFixedWidth(scroller_w);
+    iv2e_->setFixedWidth(scroller_w);
+
+    iv2_->enableSelection(false);
+    iv2e_->enableSelection(false);
+
+    QHBoxLayout *layout = new QHBoxLayout;
+    layout->addWidget(iv1_);
+    layout->addWidget(iv2_);
+    layout->addWidget(iv2e_);
+    QPushButton *pb = new QPushButton("*");
+    pb->setFixedSize(pb->sizeHint());
+    connect(pb, SIGNAL(clicked()), SLOT(switchView()));
+    layout->addWidget(pb);
+    layout->addWidget(v3d_);
+    layout->addWidget(iv2d_);
+    layout->addWidget(iv2d2_);
+    layout->addWidget(dot_plot_);
+
     v3d_->show();
     iv2d_->hide();
     iv2d2_->hide();
     dot_plot_->hide();
-  }
-  update_views(false);
+
+    setLayout(layout);
+}
+
+MainApp::~MainApp() {
+    quit();
+}
+
+void MainApp::resizeEvent(QResizeEvent *e) {
+    QDialog::resizeEvent(e);
+    update_views();
+}
+
+void MainApp::quit() {
+    if (!done_flag_) {
+        done_flag_ = true;
+
+        exit(EXIT_SUCCESS);
+    }
+}
+
+void MainApp::reject() {
+    quit();
+}
+
+bool MainApp::load_file(const char *filename) {
+    FILE *f = fopen(filename, "rb");
+    if (!f) {
+        fprintf(stderr, "Unable to open %s\n", filename);
+        return false;
+    }
+    fseek(f, 0, SEEK_END);
+    long len = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    if (bin_ != NULL) {
+        delete[] bin_;
+        bin_ = NULL;
+        bin_len_ = 0;
+        start_ = 0;
+        end_ = 0;
+    }
+
+    bin_ = new unsigned char[len];
+    bin_len_ = fread(bin_, 1, len, f);
+    fclose(f);
+
+    if (len != bin_len_) {
+        printf("premature read %ld of %ld\n", bin_len_, len);
+    }
+
+    start_ = 0;
+    end_ = bin_len_;
+
+    update_views();
+
+    return true;
+}
+
+void MainApp::update_views(bool update_iv1) {
+    if (update_iv1) iv1_->clear();
+
+    if (bin_ == NULL) return;
+
+    // iv1 shows the entire file, iv2 shows the current segment
+    if (update_iv1) iv1_->set_data(bin_ + 0, bin_len_);
+    iv2_->set_data(bin_ + start_, end_ - start_);
+
+    {
+        long n;
+        float *dd = generate_entropy(bin_ + start_, end_ - start_, n);
+        if (dd != NULL) {
+            iv2e_->set_data(0, dd, n);
+            delete[] dd;
+        }
+    }
+
+    {
+        float *dd = generate_histo(bin_ + start_, end_ - start_);
+        if (dd != NULL) {
+            iv2e_->set_data(1, dd, 256, false);
+            delete[] dd;
+        }
+    }
+
+    if (v3d_->isVisible()) v3d_->setData(bin_ + start_, end_ - start_);
+    if (iv2d_->isVisible()) iv2d_->setData(bin_ + start_, end_ - start_);
+    if (iv2d2_->isVisible()) iv2d2_->setData(bin_ + start_, end_ - start_);
+    if (dot_plot_->isVisible()) dot_plot_->setData(bin_ + start_, end_ - start_);
+}
+
+void MainApp::rangeSelected(float s, float e) {
+    start_ = s * bin_len_;
+    end_ = e * bin_len_;
+    update_views(false);
+}
+
+void MainApp::switchView() {
+    if (v3d_->isVisible()) {
+        v3d_->hide();
+        iv2d_->show();
+        iv2d2_->hide();
+        dot_plot_->hide();
+    } else if (iv2d_->isVisible()) {
+        v3d_->hide();
+        iv2d_->hide();
+        iv2d2_->show();
+        dot_plot_->hide();
+    } else if (iv2d2_->isVisible()) {
+        v3d_->hide();
+        iv2d_->hide();
+        iv2d2_->hide();
+        dot_plot_->show();
+    } else if (dot_plot_->isVisible()) {
+        v3d_->show();
+        iv2d_->hide();
+        iv2d2_->hide();
+        dot_plot_->hide();
+    }
+    update_views(false);
 }
