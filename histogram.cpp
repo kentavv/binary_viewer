@@ -131,6 +131,7 @@ int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype)
             auto dat_f32 = (const float *) dat_u8;
             hist_float_helper_2d(hist, dat_f32, n);
         }
+            break;
         case f64: {
             auto dat_f64 = (const double *) dat_u8;
             hist_float_helper_2d(hist, dat_f64, n);

@@ -202,7 +202,7 @@ int *View3D::generate_histo(const unsigned char *dat_u8, long n, dtype_t dtype) 
         }
             break;
         case u12: {
-            const unsigned short *dat_u16 = (const unsigned short *) dat_u8;
+            auto dat_u16 = (const unsigned short *) dat_u8;
             for (long i = 0; i < n / 2 - 2; i += st) {
                 int a1 = (dat_u16[i + 0] & 0x0fff) / float(0x0fff) * 255.;
                 int a2 = (dat_u16[i + 1] & 0x0fff) / float(0x0fff) * 255.;
@@ -213,7 +213,7 @@ int *View3D::generate_histo(const unsigned char *dat_u8, long n, dtype_t dtype) 
         }
             break;
         case u16: {
-            const unsigned short *dat_u16 = (const unsigned short *) dat_u8;
+            auto dat_u16 = (const unsigned short *) dat_u8;
             for (long i = 0; i < n / 2 - 2; i += st) {
                 int a1 = dat_u16[i + 0] / float(0xffff) * 255.;
                 int a2 = dat_u16[i + 1] / float(0xffff) * 255.;
@@ -235,7 +235,7 @@ int *View3D::generate_histo(const unsigned char *dat_u8, long n, dtype_t dtype) 
         }
             break;
         case u64: {
-            const unsigned long *dat_u64 = (const unsigned long *) dat_u8;
+            auto dat_u64 = (const unsigned long *) dat_u8;
             for (long i = 0; i < n / 8 - 2; i += st) {
                 int a1 = dat_u64[i + 0] / float(0xffffffffffffffff) * 255.;
                 int a2 = dat_u64[i + 1] / float(0xffffffffffffffff) * 255.;
@@ -246,11 +246,12 @@ int *View3D::generate_histo(const unsigned char *dat_u8, long n, dtype_t dtype) 
         }
             break;
         case f32: {
-            const float *dat_f32 = (const float *) dat_u8;
+            auto dat_f32 = (const float *) dat_u8;
             hist_float_helper_3d(hist, dat_f32, n, st);
         }
+            break;
         case f64: {
-            const double *dat_f64 = (const double *) dat_u8;
+            auto dat_f64 = (const double *) dat_u8;
             hist_float_helper_3d(hist, dat_f64, n, st);
         }
             break;
