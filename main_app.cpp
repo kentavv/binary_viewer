@@ -57,6 +57,29 @@ MainApp::MainApp(QWidget *p)
     auto top_layout = new QGridLayout;
 
     {
+        auto layout = new QHBoxLayout;
+        {
+            auto pb = new QPushButton("Load file");
+            pb->setFixedSize(pb->sizeHint());
+            connect(pb, SIGNAL(clicked()), SLOT(loadFile()));
+            layout->addWidget(pb);
+        }
+        {
+            auto pb = new QPushButton("Prev");
+            pb->setFixedSize(pb->sizeHint());
+            connect(pb, SIGNAL(clicked()), SLOT(prevFile()));
+            layout->addWidget(pb);
+        }
+        {
+            auto pb = new QPushButton("Next");
+            pb->setFixedSize(pb->sizeHint());
+            connect(pb, SIGNAL(clicked()), SLOT(nextFile()));
+            layout->addWidget(pb);
+        }
+        top_layout->addLayout(layout, 0, 0);
+    }
+
+    {
         iv1_ = new ImageView;
         iv2_ = new ImageView;
         iv2e_ = new GraphView;
@@ -96,29 +119,6 @@ MainApp::MainApp(QWidget *p)
         }
 
         top_layout->addLayout(layout, 0, 1);
-    }
-
-    {
-        auto layout = new QHBoxLayout;
-        {
-            auto pb = new QPushButton("Load file");
-            pb->setFixedSize(pb->sizeHint());
-            connect(pb, SIGNAL(clicked()), SLOT(loadFile()));
-            layout->addWidget(pb);
-        }
-        {
-            auto pb = new QPushButton("Prev");
-            pb->setFixedSize(pb->sizeHint());
-            connect(pb, SIGNAL(clicked()), SLOT(prevFile()));
-            layout->addWidget(pb);
-        }
-        {
-            auto pb = new QPushButton("Next");
-            pb->setFixedSize(pb->sizeHint());
-            connect(pb, SIGNAL(clicked()), SLOT(nextFile()));
-            layout->addWidget(pb);
-        }
-        top_layout->addLayout(layout, 0, 0);
     }
 
     {
