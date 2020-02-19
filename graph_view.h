@@ -32,9 +32,9 @@
 class GraphView : public QLabel {
 Q_OBJECT
 public:
-    GraphView(QWidget *p = NULL);
+    explicit GraphView(QWidget *p = nullptr);
 
-    ~GraphView();
+    ~GraphView() override;
 
 public slots:
 
@@ -52,15 +52,15 @@ protected:
     QImage img_[2];
     QPixmap pix_;
 
-    void paintEvent(QPaintEvent *);
+    void paintEvent(QPaintEvent *) override;
 
-    void resizeEvent(QResizeEvent *e);
+    void resizeEvent(QResizeEvent *e) override;
 
-    void mousePressEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event) override;
 
-    void mouseMoveEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event) override;
 
-    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
     void update_pix();
 

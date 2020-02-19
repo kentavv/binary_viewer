@@ -27,8 +27,6 @@
 #include "main_app.h"
 #include "version.h"
 
-extern const QString base_caption = appname + " " + appversion + " " __DATE__ + " " + __TIME__;
-QString caption = base_caption;
 
 //----------------------------------------------------------------------
 
@@ -37,13 +35,15 @@ int main(int argc, char *argv[]) {
 
     MainApp a;
 
-    if (argc != 2) {
+    if (argc > 2) {
         fprintf(stderr, "usage: %s <filename>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    if (!a.load_file(argv[1])) {
-        exit(EXIT_FAILURE);
+    if (argc == 2) {
+        if (!a.load_file(argv[1])) {
+            exit(EXIT_FAILURE);
+        }
     }
 
     a.showFullScreen();

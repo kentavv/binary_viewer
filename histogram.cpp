@@ -26,8 +26,8 @@
 #include <cmath>
 #include <algorithm>
 
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 
 #include "histogram.h"
 
@@ -98,7 +98,7 @@ int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype)
         }
             break;
         case u16: {
-            const unsigned short *dat_u16 = (const unsigned short *) dat_u8;
+            auto dat_u16 = (const unsigned short *) dat_u8;
             for (long i = 0; i < n / 2 - 1; i++) {
                 int a1 = dat_u16[i + 0] / float(0xffff) * 255.;
                 int a2 = dat_u16[i + 1] / float(0xffff) * 255.;
@@ -108,7 +108,7 @@ int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype)
         }
             break;
         case u32: {
-            const unsigned int *dat_u32 = (const unsigned int *) dat_u8;
+            auto dat_u32 = (const unsigned int *) dat_u8;
             for (long i = 0; i < n / 4 - 1; i++) {
                 int a1 = dat_u32[i + 0] / float(0xffffffff) * 255.;
                 int a2 = dat_u32[i + 1] / float(0xffffffff) * 255.;
@@ -118,7 +118,7 @@ int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype)
         }
             break;
         case u64: {
-            const unsigned long *dat_u64 = (const unsigned long *) dat_u8;
+            auto dat_u64 = (const unsigned long *) dat_u8;
             for (long i = 0; i < n / 8 - 1; i++) {
                 int a1 = dat_u64[i + 0] / float(0xffffffffffffffff) * 255.;
                 int a2 = dat_u64[i + 1] / float(0xffffffffffffffff) * 255.;
@@ -128,11 +128,11 @@ int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype)
         }
             break;
         case f32: {
-            const float *dat_f32 = (const float *) dat_u8;
+            auto dat_f32 = (const float *) dat_u8;
             hist_float_helper_2d(hist, dat_f32, n);
         }
         case f64: {
-            const double *dat_f64 = (const double *) dat_u8;
+            auto dat_f64 = (const double *) dat_u8;
             hist_float_helper_2d(hist, dat_f64, n);
         }
             break;
@@ -158,7 +158,7 @@ int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype)
 }
 
 float *generate_histo(const unsigned char *dat_u8, long n) { //, histo_dtype_t dtype) {
-    float *hist = new float[256];
+    auto hist = new float[256];
     memset(hist, 0, sizeof(hist[0]) * 256);
 
     //if(dtype != u8) {
@@ -185,13 +185,13 @@ float *generate_histo(const unsigned char *dat_u8, long n) { //, histo_dtype_t d
 float *generate_entropy(const unsigned char *dat_u8, long n, long &rv_len, int bs) { //, histo_dtype_t dtype) {
     if (n <= 0) {
         rv_len = 0;
-        return NULL;
+        return nullptr;
     }
 
     int inc = bs; // set to a value less than bs to create overlapping
 
     long ddn = n / inc + (n % inc ? 1 : 0);
-    float *dd = new float[ddn];
+    auto dd = new float[ddn];
     memset(dd, 0, sizeof(dd[0]) * ddn);
 
     {

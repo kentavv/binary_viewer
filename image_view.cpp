@@ -214,13 +214,13 @@ void ImageView::mouseReleaseEvent(QMouseEvent *e) {
 
     if (e->button() != Qt::LeftButton) return;
 
-    int x = e->pos().x();
-    int y = e->pos().y();
-
-    if (x < 0) x = 0;
-    if (x > width() - 1) x = width() - 1;
-    if (y < 0) y = 0;
-    if (y > height() - 1) y = height() - 1;
+//    int x = e->pos().x();
+//    int y = e->pos().y();
+//
+//    if (x < 0) x = 0;
+//    if (x > width() - 1) x = width() - 1;
+//    if (y < 0) y = 0;
+//    if (y > height() - 1) y = height() - 1;
 
     px_ = -1;
     py_ = -1;

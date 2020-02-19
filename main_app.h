@@ -39,18 +39,22 @@ class View3D;
 
 class GraphView;
 
+class QLabel;
+
 class MainApp : public QDialog {
 Q_OBJECT
 public:
-    MainApp(QWidget *p = NULL);
+    explicit MainApp(QWidget *p = nullptr);
 
-    ~MainApp();
+    ~MainApp() override;
 
-    bool load_file(const char *filename);
+    bool load_file(const QString &filename);
+
+    bool load_files(const QStringList &filenames);
 
 public slots:
 
-    void reject();
+    void reject() override;
 
 protected slots:
 
@@ -58,7 +62,13 @@ protected slots:
 
     void rangeSelected(float, float);
 
-    void switchView();
+    void switchView(int);
+
+    void loadFile();
+
+    bool prevFile();
+
+    bool nextFile();
 
 protected:
     ImageView *iv1_;
@@ -68,20 +78,23 @@ protected:
     ImageView3 *iv2d2_;
     DotPlot *dot_plot_;
     View3D *v3d_;
+    std::vector<QWidget *> views_;
+
+    QLabel *filename_;
+    QStringList files_;
+    int cur_file_;
 
     unsigned char *bin_;
-    long bin_len_;
+    size_t bin_len_;
 
     bool done_flag_;
 
-    QString euid;
+    size_t start_;
+    size_t end_;
 
-    long start_;
-    long end_;
+//    void updatePositions(bool resized = false);
 
-    void updatePositions(bool resized = false);
-
-    void resizeEvent(QResizeEvent *e);
+    void resizeEvent(QResizeEvent *e) override;
 
     void update_views(bool update_iv1 = true);
 };

@@ -22,9 +22,8 @@
  * SOFTWARE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <cstdio>
+#include <cstdlib>
 
 #include "bayer.h"
 
@@ -33,7 +32,8 @@
 
 //static bool debug = false;
 
-static unsigned int bayerEdgeHelp(const unsigned char *in, const int h, const int w, const int in_row_w, const int y, const int x, int &n) {
+template<class T>
+T bayerEdgeHelp(const T *in, const int h, const int w, const int in_row_w, const int y, const int x, int &n) {
     if (0 <= y && y < h &&
         0 <= x && x < w) {
         n++;
@@ -169,4 +169,3 @@ void bayerBG(const unsigned char *bayer, const int h, const int w, const int bay
 void bayerBG(const unsigned char *bayer, const int h, const int w, int perm, unsigned char *rgb) {
     bayerBG(bayer, h, w, w, perm, rgb, w * 3);
 }
-

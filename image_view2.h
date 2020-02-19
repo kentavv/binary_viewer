@@ -36,9 +36,9 @@ class QComboBox;
 class ImageView2 : public QLabel {
 Q_OBJECT
 public:
-    ImageView2(QWidget *p = NULL);
+    explicit ImageView2(QWidget *p = nullptr);
 
-    ~ImageView2();
+    ~ImageView2() override;
 
 public slots:
 
@@ -56,9 +56,9 @@ protected:
     QImage img_;
     QPixmap pix_;
 
-    void paintEvent(QPaintEvent *);
+    void paintEvent(QPaintEvent *) override;
 
-    void resizeEvent(QResizeEvent *e);
+    void resizeEvent(QResizeEvent *e) override;
 
     void update_pix();
 

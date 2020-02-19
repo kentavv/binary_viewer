@@ -27,7 +27,8 @@
 
 #include <qstring.h>
 
-static const QString appname = "Bin Viewer";
-static const QString appversion = "0.1";
+extern const QString appname;
+extern const QString appversion;
+extern const QString base_caption;
 
 #endif

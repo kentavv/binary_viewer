@@ -225,11 +225,11 @@ void ImageView3::parameters_changed() {
 
     switch (t) {
         case rgb8: {
-            const unsigned char *dat_u8 = (const unsigned char *) (dat_ + offset);
+            auto dat_u8 = dat_ + offset;
             int n = (dat_n_ - offset) / 1 / 3;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = dat_u8[i * 3 + 0];
                 unsigned char g = dat_u8[i * 3 + 1];
@@ -240,11 +240,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case rgb12: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2 / 3;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = (dat_u16[i * 3 + 0] >> 4) & 0xff;
                 unsigned char g = (dat_u16[i * 3 + 1] >> 4) & 0xff;
@@ -255,11 +255,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case rgb16: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2 / 3;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = (dat_u16[i * 3 + 0] >> 8) & 0xff;
                 unsigned char g = (dat_u16[i * 3 + 1] >> 8) & 0xff;
@@ -270,11 +270,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case rgba8: {
-            const unsigned char *dat_u8 = (const unsigned char *) (dat_ + offset);
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
             int n = (dat_n_ - offset) / 1 / 4;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = dat_u8[i * 4 + 0];
                 unsigned char g = dat_u8[i * 4 + 1];
@@ -285,11 +285,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case rgba12: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2 / 4;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = (dat_u16[i * 4 + 0] >> 4) & 0xff;
                 unsigned char g = (dat_u16[i * 4 + 1] >> 4) & 0xff;
@@ -300,11 +300,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case rgba16: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2 / 4;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = dat_u16[i * 4 + 0] >> 8;
                 unsigned char g = dat_u16[i * 4 + 1] >> 8;
@@ -315,11 +315,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case bgr8: {
-            const unsigned char *dat_u8 = (const unsigned char *) (dat_ + offset);
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
             int n = (dat_n_ - offset) / 1 / 3;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = dat_u8[i * 3 + 2];
                 unsigned char g = dat_u8[i * 3 + 1];
@@ -330,11 +330,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case bgr12: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2 / 3;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = (dat_u16[i * 3 + 2] >> 4) & 0xff;
                 unsigned char g = (dat_u16[i * 3 + 1] >> 4) & 0xff;
@@ -345,11 +345,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case bgr16: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2 / 3;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = (dat_u16[i * 3 + 2] >> 8) & 0xff;
                 unsigned char g = (dat_u16[i * 3 + 1] >> 8) & 0xff;
@@ -360,11 +360,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case bgra8: {
-            const unsigned char *dat_u8 = (const unsigned char *) (dat_ + offset);
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
             int n = (dat_n_ - offset) / 1 / 4;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = dat_u8[i * 4 + 2];
                 unsigned char g = dat_u8[i * 4 + 1];
@@ -375,11 +375,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case bgra12: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2 / 4;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = (dat_u16[i * 4 + 2] >> 4) & 0xff;
                 unsigned char g = (dat_u16[i * 4 + 1] >> 4) & 0xff;
@@ -390,11 +390,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case bgra16: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2 / 4;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = (dat_u16[i * 4 + 2] >> 8) & 0xff;
                 unsigned char g = (dat_u16[i * 4 + 1] >> 8) & 0xff;
@@ -405,11 +405,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case grey8: {
-            const unsigned char *dat_u8 = (const unsigned char *) (dat_ + offset);
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
             int n = (dat_n_ - offset) / 1;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char c = dat_u8[i];
                 unsigned char r = c;
@@ -421,11 +421,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case grey12: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char c = (dat_u16[i] >> 4) & 0xff;
                 unsigned char r = c;
@@ -437,11 +437,11 @@ void ImageView3::parameters_changed() {
         }
             break;
         case grey16: {
-            const unsigned short *dat_u16 = (const unsigned short *) (dat_ + offset);
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
             int n = (dat_n_ - offset) / 2;
             img = QImage(w, n / w + 1, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char c = (dat_u16[i] >> 8) & 0xff;
                 unsigned char r = c;
@@ -479,10 +479,10 @@ void ImageView3::parameters_changed() {
             int h = dat_n_ / w + 1;
             //int bayer_n = w * h;
 
-            const unsigned char *dat_u8 = (const unsigned char *) (dat_ + offset);
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
 
             const unsigned char *bayer = dat_u8;
-            unsigned char *rgb = new unsigned char[w * h * 3];
+            auto rgb = new unsigned char[w * h * 3];
             int perm = 0;
             switch (t) {
                 case bayer8_0:
@@ -563,7 +563,7 @@ void ImageView3::parameters_changed() {
             int n = (dat_n_ - offset) / 1;
             img = QImage(w, h, QImage::Format_RGB32);
             img.fill(0);
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
             for (int i = 0; i < n; i++) {
                 unsigned char r = rgb[i * 3 + 0];
                 unsigned char g = rgb[i * 3 + 1];

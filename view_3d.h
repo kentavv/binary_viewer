@@ -36,9 +36,9 @@ class QCheckBox;
 class View3D : public QGLWidget {
 Q_OBJECT
 public:
-    View3D(QWidget *p = NULL);
+    explicit View3D(QWidget *p = nullptr);
 
-    ~View3D();
+    ~View3D() override;
 
 public slots:
 
@@ -51,17 +51,17 @@ protected slots:
     void regen_histo();
 
 protected:
-    void initializeGL();
+    void initializeGL() override;
 
-    void resizeGL(int w, int h);
+    void resizeGL(int w, int h) override;
 
-    void paintGL();
+    void paintGL() override;
 
-    void mousePressEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event) override;
 
-    void mouseMoveEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event) override;
 
-    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
     typedef enum {
         none, u8, u12, u16, u32, u64, f32, f64
