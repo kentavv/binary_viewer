@@ -51,6 +51,9 @@ void ImageView::set_data(const unsigned char *dat, long len) {
     int w = width();
     int h = height();
 
+    m1_ = 0.;
+    m2_ = 1.;
+
     {
         int wh = w * h;
 
@@ -58,7 +61,7 @@ void ImageView::set_data(const unsigned char *dat, long len) {
             QImage img(w, len / w + 1, QImage::Format_RGB32);
             img.fill(0);
 
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
 
             for (int i = 0; i < len; i++) {
                 unsigned char c = dat[i];
@@ -77,7 +80,7 @@ void ImageView::set_data(const unsigned char *dat, long len) {
             QImage img(w, len / sf / w + 1, QImage::Format_RGB32);
             img.fill(0);
 
-            unsigned int *p = (unsigned int *) img.bits();
+            auto p = (unsigned int *) img.bits();
 
             for (int i = 0; i < len;) {
                 unsigned char c;
