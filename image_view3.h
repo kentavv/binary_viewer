@@ -1,25 +1,20 @@
 /*
- * MIT License
- * 
- * Copyright (c) 2015, 2017 Kent A. Vander Velden
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * Copyright (c) 2015, 2017, 2020 Kent A. Vander Velden, kent.vandervelden@gmail.com
+ *
+ * This file is part of BinVis.
+ *
+ *     BinVis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     BinVis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _IMAGE_VIEW3_H_
@@ -30,63 +25,71 @@
 #include <QPixmap>
 
 class QSpinBox;
+
 class QComboBox;
 
 class ImageView3 : public QLabel {
-  Q_OBJECT
+Q_OBJECT
 public:
-  ImageView3(QWidget *p=NULL);
-  ~ImageView3();
+    explicit ImageView3(QWidget *p = nullptr);
+
+    ~ImageView3() override;
 
 public slots:
-  void setData(const unsigned char *dat, long n);
-  void parameters_changed();
-  
+
+    void setData(const unsigned char *dat, long n);
+
+    void parameters_changed();
+
 protected slots:
-  void setImage(QImage &img);
-  void regen_image();
-  
+
+    void setImage(QImage &img);
+
+    void regen_image();
+
 protected:
-  QImage img_;
-  QPixmap pix_;
+    QImage img_;
+    QPixmap pix_;
 
-  void paintEvent(QPaintEvent *);
-  void resizeEvent(QResizeEvent *e);
+    void paintEvent(QPaintEvent *) override;
 
-  void update_pix();
+    void resizeEvent(QResizeEvent *e) override;
 
-  typedef enum {none, rgb8, rgb12, rgb16, rgba8, rgba12, rgba16, bgr8, bgr12, bgr16, bgra8, bgra12, bgra16, grey8, grey12, grey16,
-		bayer8_0,
-		bayer8_1,
-		bayer8_2,
-		bayer8_3,
-		bayer8_4,
-		bayer8_5,
-		bayer8_6,
-		bayer8_7,
-		bayer8_8,
-		bayer8_9,
-		bayer8_10,
-		bayer8_11,
-		bayer8_12,
-		bayer8_13,
-		bayer8_14,
-		bayer8_15,
-		bayer8_16,
-		bayer8_17,
-		bayer8_18,
-		bayer8_19,
-		bayer8_20,
-		bayer8_21,
-		bayer8_22,
-		bayer8_23
-  } dtype_t;
+    void update_pix();
 
-  QSpinBox *offset_, *width_;
-  QComboBox *type_;
-  const unsigned char *dat_;
-  long dat_n_;
-  bool inverted_;
+    typedef enum {
+        none, rgb8, rgb12, rgb16, rgba8, rgba12, rgba16, bgr8, bgr12, bgr16, bgra8, bgra12, bgra16, grey8, grey12, grey16,
+        bayer8_0,
+        bayer8_1,
+        bayer8_2,
+        bayer8_3,
+        bayer8_4,
+        bayer8_5,
+        bayer8_6,
+        bayer8_7,
+        bayer8_8,
+        bayer8_9,
+        bayer8_10,
+        bayer8_11,
+        bayer8_12,
+        bayer8_13,
+        bayer8_14,
+        bayer8_15,
+        bayer8_16,
+        bayer8_17,
+        bayer8_18,
+        bayer8_19,
+        bayer8_20,
+        bayer8_21,
+        bayer8_22,
+        bayer8_23
+    } dtype_t;
+
+    QSpinBox *offset_, *width_;
+    QComboBox *type_;
+    const unsigned char *dat_;
+    long dat_n_;
+    bool inverted_;
 };
 
 #endif

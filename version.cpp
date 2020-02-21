@@ -17,17 +17,9 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _HISTOGRAM_H_
-#define _HISTOGRAM_H_
+#include "version.h"
 
-typedef enum {
-    none, u8, u16, u32, u64, f32, f64
-} histo_dtype_t;
+const QString appname = "Bin Viewer";
+const QString appversion = "0.1";
+const QString base_caption = appname + " " + appversion + " " __DATE__ + " " + __TIME__;
 
-int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype);
-
-float *generate_histo(const unsigned char *dat_u8, long n);
-
-float *generate_entropy(const unsigned char *dat_u8, long n, long &rv_len, int bs = 256);
-
-#endif

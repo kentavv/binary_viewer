@@ -31,6 +31,7 @@ add_executable(binary_viewer
         main.cpp
         main_app.cpp
         main_app.h
+        version.cpp
         version.h
         view_3d.cpp
         view_3d.h)

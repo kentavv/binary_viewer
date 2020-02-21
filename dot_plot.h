@@ -1,25 +1,20 @@
 /*
- * MIT License
- * 
- * Copyright (c) 2015, 2017 Kent A. Vander Velden
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * Copyright (c) 2015, 2017, 2020 Kent A. Vander Velden, kent.vandervelden@gmail.com
+ *
+ * This file is part of BinVis.
+ *
+ *     BinVis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     BinVis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef _DOTPLOT_H_
@@ -32,35 +27,43 @@
 class QSpinBox;
 
 class DotPlot : public QLabel {
-  Q_OBJECT
+Q_OBJECT
 public:
-  DotPlot(QWidget *p=NULL);
-  ~DotPlot();
+    explicit DotPlot(QWidget *p = nullptr);
+
+    ~DotPlot() override;
 
 public slots:
-  void setData(const unsigned char *dat, long n);
-  void parameters_changed();
-  
-protected slots:
-  void setImage(QImage &img);
 
-  void advance_mat();
-  void regen_image();
+    void setData(const unsigned char *dat, long n);
+
+    void parameters_changed();
+
+protected slots:
+
+    void setImage(QImage &img);
+
+    void advance_mat();
+
+    void regen_image();
 
 protected:
-  QImage img_;
-  QPixmap pix_;
+    QImage img_;
+    QPixmap pix_;
 
-  void paintEvent(QPaintEvent *);
-  void resizeEvent(QResizeEvent *e);
+    void paintEvent(QPaintEvent *) override;
 
-  void update_pix();
+    void resizeEvent(QResizeEvent *e) override;
 
-  typedef enum {none, rgb8, rgb16, rgba8, rgba16, bgr8, bgr16, bgra8, bgra16, grey8, grey16 } dtype_t;
+    void update_pix();
 
-  QSpinBox *offset1_, *offset2_, *width_, *max_samples_;
-  const unsigned char *dat_;
-  long dat_n_;
+    typedef enum {
+        none, rgb8, rgb16, rgba8, rgba16, bgr8, bgr16, bgra8, bgra16, grey8, grey16
+    } dtype_t;
+
+    QSpinBox *offset1_, *offset2_, *width_, *max_samples_;
+    const unsigned char *dat_;
+    long dat_n_;
 };
 
 #endif
