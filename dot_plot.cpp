@@ -38,17 +38,18 @@ int pts_i = 0;
 
 DotPlot::DotPlot(QWidget *p)
         : QLabel(p),
-          dat_(NULL), dat_n_(0) {
+          dat_(nullptr), dat_n_(0) {
     {
-        QGridLayout *layout = new QGridLayout(this);
+        auto layout = new QGridLayout(this);
         int r = 0;
+
         {
-            QLabel *l = new QLabel("Offset1 (B)");
+            auto l = new QLabel("Offset1 (B)");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, r, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(0, 100000);
@@ -57,13 +58,14 @@ DotPlot::DotPlot(QWidget *p)
             layout->addWidget(sb, r, 1);
         }
         r++;
+
         {
-            QLabel *l = new QLabel("Offset2 (B)");
+            auto l = new QLabel("Offset2 (B)");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, r, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(0, 100000);
@@ -72,13 +74,14 @@ DotPlot::DotPlot(QWidget *p)
             layout->addWidget(sb, r, 1);
         }
         r++;
+
         {
-            QLabel *l = new QLabel("Width");
+            auto l = new QLabel("Width");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, r, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(1, 100000);
@@ -87,13 +90,14 @@ DotPlot::DotPlot(QWidget *p)
             layout->addWidget(sb, r, 1);
         }
         r++;
+
         {
-            QLabel *l = new QLabel("Max Samples");
+            auto l = new QLabel("Max Samples");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, r, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(1, 100000);
@@ -111,9 +115,6 @@ DotPlot::DotPlot(QWidget *p)
         QObject::connect(width_, SIGNAL(valueChanged(int)), this, SLOT(parameters_changed()));
         QObject::connect(max_samples_, SIGNAL(valueChanged(int)), this, SLOT(parameters_changed()));
     }
-}
-
-DotPlot::~DotPlot() {
 }
 
 void DotPlot::setImage(QImage &img) {
@@ -165,35 +166,30 @@ void DotPlot::setData(const unsigned char *dat, long n) {
     regen_image();
 }
 
-int *mat = NULL;
+int *mat = nullptr;
 
 void DotPlot::parameters_changed() {
-    if (mat) {
-        delete[] mat;
-        mat = NULL;
-    }
-
-    int mwh = min(width(), height());
+    delete[] mat;
+    mat = nullptr;
 
     long mdw = min(dat_n_, (long) width_->value());
+    int mwh = min(min(width(), height()), (int)mdw);
 
-    if (mwh > mdw) mwh = mdw;
-
-    if (mat == NULL) {
-        mat = new int[mwh * mwh];
-        memset(mat, 0, sizeof(mat[0]) * mwh * mwh);
-    }
+    // Could avoid re-allocation if size has not changed.
+    mat = new int[mwh * mwh];
+    memset(mat, 0, sizeof(mat[0]) * mwh * mwh);
 
     pts.clear();
+    pts.reserve(mwh * mwh);
     for (int i = 0; i < mwh; i++) {
         for (int j = i; j < mwh; j++) {
-            pts.push_back(make_pair(i, j));
+            pts.emplace_back(make_pair(i, j));
         }
     }
-    pts_i = pts.size();
     random_shuffle(pts.begin(), pts.end());
 
     // pts_i is decremented in advance_mat()
+    pts_i = pts.size();
     while (pts_i > 0) {
         advance_mat();
     }
@@ -210,7 +206,7 @@ void DotPlot::advance_mat() {
     float sf = 1.;
     {
         long mdw = min(dat_n_, (long) width_->value());
-        if (mwh > mdw) mwh = mdw;
+        mwh = min(mwh, (int)mdw);
         if (mwh < mdw) {
             sf = mwh / float(mdw);
         }
@@ -258,7 +254,7 @@ void DotPlot::regen_image() {
 
     QImage img(mwh, mwh, QImage::Format_RGB32);
     img.fill(0);
-    unsigned int *p = (unsigned int *) img.bits();
+    auto p = (unsigned int *) img.bits();
     for (int i = 0; i < mwh * mwh; i++) {
         unsigned char c = mat[i] / float(m) * 255.;
         unsigned char r = c;

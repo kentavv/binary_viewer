@@ -31,7 +31,7 @@ Q_OBJECT
 public:
     explicit DotPlot(QWidget *p = nullptr);
 
-    ~DotPlot() override;
+    ~DotPlot() override = default;
 
 public slots:
 
@@ -56,10 +56,6 @@ protected:
     void resizeEvent(QResizeEvent *e) override;
 
     void update_pix();
-
-    typedef enum {
-        none, rgb8, rgb16, rgba8, rgba16, bgr8, bgr16, bgra8, bgra16, grey8, grey16
-    } dtype_t;
 
     QSpinBox *offset1_, *offset2_, *width_, *max_samples_;
     const unsigned char *dat_;
