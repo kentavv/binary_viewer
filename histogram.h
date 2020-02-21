@@ -20,11 +20,17 @@
 #ifndef _HISTOGRAM_H_
 #define _HISTOGRAM_H_
 
+#include <string>
+
 typedef enum {
-    none, u8, u16, u32, u64, f32, f64
+    none, u8, u12, u16, u32, u64, f32, f64
 } histo_dtype_t;
 
+histo_dtype_t string_to_histo_dtype(const std::string &s);
+
 int *generate_histo_2d(const unsigned char *dat_u8, long n, histo_dtype_t dtype);
+
+int *generate_histo_3d(const unsigned char *dat_u8, long n, histo_dtype_t dtype, bool overlap = true);
 
 float *generate_histo(const unsigned char *dat_u8, long n);
 

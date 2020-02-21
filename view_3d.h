@@ -58,12 +58,6 @@ protected:
 
     void mouseReleaseEvent(QMouseEvent *event) override;
 
-    typedef enum {
-        none, u8, u12, u16, u32, u64, f32, f64
-    } dtype_t;
-
-    int *generate_histo(const unsigned char *, long int, dtype_t);
-
     QSpinBox *thresh_, *scale_;
     QComboBox *type_;
     QCheckBox *overlap_;
