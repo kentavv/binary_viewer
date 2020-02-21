@@ -33,7 +33,7 @@ Q_OBJECT
 public:
     explicit ImageView3(QWidget *p = nullptr);
 
-    ~ImageView3() override;
+    ~ImageView3() override = default;
 
 public slots:
 
