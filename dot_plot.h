@@ -20,6 +20,8 @@
 #ifndef _DOTPLOT_H_
 #define _DOTPLOT_H_
 
+#include <vector>
+
 #include <QLabel>
 #include <QImage>
 #include <QPixmap>
@@ -43,7 +45,7 @@ protected slots:
 
     void setImage(QImage &img);
 
-    void advance_mat();
+    void advance_mat(int mwh, float sf, const std::vector<int> &rand);
 
     void regen_image();
 

@@ -27,6 +27,7 @@
 
 #include "dot_plot.h"
 
+using std::max;
 using std::min;
 using std::vector;
 using std::random_shuffle;
@@ -160,22 +161,19 @@ void DotPlot::setData(const unsigned char *dat, long n) {
 
     width_->setValue(dat_n_);
 
-    parameters_changed();
-
-    for (int i = 0; i < pts_i; i++) {
-        advance_mat();
-    }
-    regen_image();
+    // parameters_changed() triggered by the previous setValue() call.
+    // parameters_changed();
 }
 
 int *mat = nullptr;
 
 void DotPlot::parameters_changed() {
+    puts("called");
     delete[] mat;
     mat = nullptr;
 
     long mdw = min(dat_n_, (long) width_->value());
-    int mwh = min(min(width(), height()), (int)mdw);
+    int mwh = min(min(width(), height()), (int) mdw);
 
     // Could avoid re-allocation if size has not changed.
     mat = new int[mwh * mwh];
@@ -190,55 +188,57 @@ void DotPlot::parameters_changed() {
     }
     random_shuffle(pts.begin(), pts.end());
 
-    // pts_i is decremented in advance_mat()
-    pts_i = pts.size();
-    while (pts_i > 0) {
-        advance_mat();
+    {
+        float sf = 1.f;
+        if (mwh < mdw) {
+            sf = mwh / float(mdw);
+        }
+
+        int xyn = 1 / sf;
+
+        // Precompute some random values for sampling
+        std::vector<int> rand;
+        {
+            int n = min(max_samples_->value(), xyn * xyn);
+            rand.reserve(n);
+            printf("Generating %d values in range [0, %d-1]\n", n, xyn);
+            for (int tt = 0; tt < n; tt++) {
+                rand.emplace_back(random() % xyn);
+            }
+        }
+
+        printf("pts.size(): %d\n", pts.size());
+        // pts_i is decremented in advance_mat()
+        pts_i = pts.size();
+        while (pts_i > 0) {
+//            random_shuffle(rand.begin(), rand.end());
+            advance_mat(mwh, sf, rand);
+        }
     }
     regen_image();
 }
 
-void DotPlot::advance_mat() {
+void DotPlot::advance_mat(int mwh, float sf, const vector<int> &rand) {
     if (pts_i == 0 || pts.empty()) return;
 
     pts_i--;
     pair<int, int> pt = pts[pts_i];
-
-    int mwh = min(width(), height());
-    float sf = 1.;
-    {
-        long mdw = min(dat_n_, (long) width_->value());
-        mwh = min(mwh, (int)mdw);
-        if (mwh < mdw) {
-            sf = mwh / float(mdw);
-        }
-    }
 
     int x = pt.first;
     int y = pt.second;
 
     int xo = x / sf;
     int yo = y / sf;
-    int xyn = 1 / sf;
 
-    for (int tt = 0; tt < min(max_samples_->value(), xyn * xyn); tt++) {
-        int i = random() % xyn + xo;
-        int j = random() % xyn + yo;
+    for (int tt = 0; tt < rand.size(); tt++) {
+        int i = xo + rand[tt];
+        int j = yo + rand[tt];
 
-        {
-            if (dat_[i] == dat_[j]) {
-                int ii = y * mwh + x;
-                if (ii < 0 || mwh * mwh <= ii) {
-                    continue;
-                }
-                mat[ii]++;
-
-                int jj = x * mwh + y;
-                if (jj < 0 || mwh * mwh <= jj) {
-                    continue;
-                }
-                mat[jj]++;
-            }
+        if (dat_[i] == dat_[j]) {
+            int ii = y * mwh + x;
+            int jj = x * mwh + y;
+            if (0 <= ii && ii < mwh * mwh) mat[ii]++;
+            if (0 <= jj && jj < mwh * mwh) mat[jj]++;
         }
     }
 }
@@ -249,16 +249,30 @@ void DotPlot::regen_image() {
 
     if (mwh > mdw) mwh = mdw;
 
+    // Find the maximum value, ignoring the diagonal.
+    // Could stop the search once m = max_samples_->value()
     int m = 0;
-    for (int i = 0; i < mwh * mwh; i++) {
-        if (m < mat[i]) m = mat[i];
+    for (int j = 0; j < mwh; j++) {
+        for (int i = 0; i < j; i++) {
+            int k = j * mwh + i;
+            if (m < mat[k]) m = mat[k];
+        }
+        for (int i = j + 1; i < mwh; i++) {
+            int k = j * mwh + i;
+            if (m < mat[k]) m = mat[k];
+        }
     }
+
+    // Brighten up the image
+    printf("max: %d\n", m);
+    m = max(1, int(m * .75));
+    printf("max: %d\n", m);
 
     QImage img(mwh, mwh, QImage::Format_RGB32);
     img.fill(0);
     auto p = (unsigned int *) img.bits();
     for (int i = 0; i < mwh * mwh; i++) {
-        unsigned char c = mat[i] / float(m) * 255.;
+        int c = min(255, int(mat[i] / float(m) * 255. + .5));
         unsigned char r = c;
         unsigned char g = c;
         unsigned char b = c;
