@@ -124,6 +124,8 @@ void ImageView2::resizeEvent(QResizeEvent *e) {
 }
 
 void ImageView2::update_pix() {
+    if (img_.isNull()) return;
+
     int vw = width();
     int vh = height();
     pix_ = QPixmap::fromImage(img_).scaled(vw, vh); //, Qt::KeepAspectRatio);

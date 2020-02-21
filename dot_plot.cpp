@@ -143,6 +143,8 @@ void DotPlot::resizeEvent(QResizeEvent *e) {
 }
 
 void DotPlot::update_pix() {
+    if (img_.isNull()) return;
+
     pix_ = QPixmap::fromImage(img_.scaled(size())); //, Qt::KeepAspectRatio);
     setPixmap(pix_);
 }

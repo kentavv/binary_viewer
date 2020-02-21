@@ -30,9 +30,6 @@ GraphView::GraphView(QWidget *p)
           m1_(0.), m2_(1.), ind_(0), s_(none), allow_selection_(true) {
 }
 
-GraphView::~GraphView() {
-}
-
 void GraphView::enableSelection(bool v) {
     allow_selection_ = v;
     update();
@@ -143,6 +140,8 @@ void GraphView::resizeEvent(QResizeEvent *e) {
 }
 
 void GraphView::update_pix() {
+    if (img_[ind_].isNull()) return;
+
     int vw = width();
     int vh = height();
     pix_ = QPixmap::fromImage(img_[ind_]).scaled(vw, vh); //, Qt::KeepAspectRatio);

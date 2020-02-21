@@ -29,7 +29,7 @@ Q_OBJECT
 public:
     explicit GraphView(QWidget *p = nullptr);
 
-    ~GraphView() override;
+    ~GraphView() override = default;
 
 public slots:
 
