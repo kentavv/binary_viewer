@@ -41,12 +41,6 @@ static int scroller_w = 16 * 8;
 
 MainApp::MainApp(QWidget *p)
         : QDialog(p), cur_file_(-1), bin_(nullptr), bin_len_(0), start_(0), end_(0) {
-    if (1) {
-        QPalette pal = palette();
-        pal.setBrush(QPalette::Background, QBrush(Qt::black));
-        setPalette(pal);
-    }
-
     done_flag_ = false;
 
     auto top_layout = new QGridLayout;
