@@ -8,6 +8,8 @@ QMAKE_CXXFLAGS +=
 
 QMAKE_LFLAGS += -lGLU -lglut
 
+RESOURCES += qdarkstyle/style.qrc
+
 # Input
 HEADERS += \
 main_app.h version.h histogram.h image_view.h graph_view.h view_3d.h image_view2.h image_view3.h dot_plot.h bayer.h

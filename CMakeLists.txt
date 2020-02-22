@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOMOC ON)
+# Instruct CMake to include project Qt resources as needed
+set(CMAKE_AUTORCC ON)
 # Create code from a list of Qt designer ui files
 set(CMAKE_AUTOUIC ON)
 
@@ -36,7 +38,8 @@ add_executable(binary_viewer
         version.cpp
         version.h
         view_3d.cpp
-        view_3d.h)
+        view_3d.h
+        bin_viewer.qrc)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui OpenGL)
 target_link_libraries(binary_viewer Qt5::Core Qt5::Widgets Qt5::Gui Qt5::OpenGL)
