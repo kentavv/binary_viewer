@@ -63,7 +63,7 @@ void ImageView::set_data(const unsigned char *dat, long len) {
     {
         int wh = w * h;
 
-        printf("wxh: %d %d\n", w, h);
+//        printf("wxh: %d %d\n", w, h);
 
         int h_ind = 0;
 
@@ -129,7 +129,7 @@ void ImageView::set_data(const unsigned char *dat, long len) {
 #endif
             }
 #endif
-            printf("A %d %d %d %d\n", width(), height(), img.width(), img.height());
+//            printf("A %d %d %d %d\n", width(), height(), img.width(), img.height());
             img = img.scaled(size());
             setImage(img);
         } else {
@@ -209,7 +209,7 @@ void ImageView::set_data(const unsigned char *dat, long len) {
 #endif
             }
 #endif
-            printf("B %d %d %d %d\n", width(), height(), img.width(), img.height());
+//            printf("B %d %d %d %d\n", width(), height(), img.width(), img.height());
             img = img.scaled(size());
             setImage(img);
         }
@@ -247,10 +247,11 @@ void ImageView::resizeEvent(QResizeEvent *e) {
 void ImageView::update_pix() {
     if (img_.isNull()) return;
 
-    int vw = width();
-    int vh = height();
+    int vw = width() - 4;
+    int vh = height() - 4; // TODO BUG: With QDarkStyle, without the subtraction, the height or width of the application grows without bounds.
     pix_ = QPixmap::fromImage(img_).scaled(vw, vh); //, Qt::KeepAspectRatio);
     setPixmap(pix_);
+    printf("%d %d   %d %d   %d %d\n", vw, vh, img_.width(), img_.height(), width(), height());
 }
 
 void ImageView::mousePressEvent(QMouseEvent *e) {
