@@ -1,13 +1,8 @@
-Binary Viewer is a tool for binary file discovery using visualizations that may contain patterns.
+Binary Viewer is a tool for binary file discovery using visualizations that may highlight patterns.
 
-Loosely based on Cantor.Dust, Binary Viewer was developed September 21-October 8, 2015 after seeing a demo of Cantor.Dust but receiving no response regarding availability.
-Since Cantor.Dust was released, another tools have similar functionality and available. Binary Viewer is meant as a reference for those interested but is unlikely to receive active development.
+Loosely based on Cantor.Dust, Binary Viewer was developed after seeing a demo of Cantor.Dust but receiving no response regarding availability.
 
-For more information on this and related programs for visualizing binaries see https://www.youtube.com/watch?v=C8--cXwuuFQ&list=PLUyyOw61zxiJXMihb4PjYbGHEgdGxMuY3
-
-To compile Binary Viewer, Qt4 is required.
-
-Since Cantor.Dust was released, another tools have similar functionality and available.
+Since Cantor.Dust was demoed, other tools with have similar functionality became available.
 https://github.com/devttys0/binwalk/wiki/Quick-Start-Guide
 https://sites.google.com/site/xxcantorxdustxx/home
 https://github.com/wapiflapi/binglide
@@ -20,6 +15,9 @@ https://media.blackhat.com/bh-us-10/whitepapers/Bratus_Conti/BlackHat-USA-2010-B
 Even earlier are dotplots for RE'ing, here Dan Kaminsky's Blackops talk
 https://www.slideshare.net/dakami/dmk-blackops2006
 
-For more information, contact
+For more information on this and related programs for visualizing binaries see https://www.youtube.com/watch?v=C8--cXwuuFQ&list=PLUyyOw61zxiJXMihb4PjYbGHEgdGxMuY3
+
+Qt5 is required to compile Binary Viewer.
+
 Kent A. Vander Velden
 kent.vandervelden@gmail.com

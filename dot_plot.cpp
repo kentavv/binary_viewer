@@ -166,7 +166,9 @@ void DotPlot::resizeEvent(QResizeEvent *e) {
 void DotPlot::update_pix() {
     if (img_.isNull()) return;
 
-    pix_ = QPixmap::fromImage(img_.scaled(size())); //, Qt::KeepAspectRatio);
+    int vw = width() - 4;
+    int vh = height() - 4; // TODO BUG: With QDarkStyle, without the subtraction, the height or width of the application grows without bounds.
+    pix_ = QPixmap::fromImage(img_).scaled(vw, vh); //, Qt::KeepAspectRatio);
     setPixmap(pix_);
 }
 

@@ -126,8 +126,8 @@ void ImageView2::resizeEvent(QResizeEvent *e) {
 void ImageView2::update_pix() {
     if (img_.isNull()) return;
 
-    int vw = width();
-    int vh = height();
+    int vw = width() - 4;
+    int vh = height() - 4; // TODO BUG: With QDarkStyle, without the subtraction, the height or width of the application grows without bounds.
     pix_ = QPixmap::fromImage(img_).scaled(vw, vh); //, Qt::KeepAspectRatio);
     setPixmap(pix_);
 }
