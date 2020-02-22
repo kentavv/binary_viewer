@@ -73,7 +73,7 @@ void GraphView::set_data(int ind, const float *dat, long len, bool normalize) {
 
         auto acc = new float[h];
         memset(acc, 0, h * sizeof(float));
-        int *cnt = new int[h];
+        auto cnt = new int[h];
         memset(cnt, 0, h * sizeof(int));
 
         for (int i = 0; i < len; i++) {

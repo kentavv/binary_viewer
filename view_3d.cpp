@@ -111,6 +111,7 @@ View3D::View3D(QWidget *p)
     }
     {
         auto cb = new QCheckBox;
+        cb->setFixedSize(cb->sizeHint());
         cb->setChecked(true);
         overlap_ = cb;
         layout->addWidget(cb, r, 1);
