@@ -17,12 +17,17 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+
 #include <QtGui>
 
 #include "image_view.h"
 
 using std::max;
 using std::min;
+using std::vector;
+using std::pair;
+using std::make_pair;
 
 ImageView::ImageView(QWidget *p)
         : QLabel(p),
@@ -45,6 +50,8 @@ void ImageView::setImage(QImage &img) {
     update();
 }
 
+vector<pair<int, int> > hilbert;
+
 void ImageView::set_data(const unsigned char *dat, long len) {
     int w = width();
     int h = height();
@@ -55,9 +62,33 @@ void ImageView::set_data(const unsigned char *dat, long len) {
     {
         int wh = w * h;
 
+        printf("wxh: %d %d\n", w, h);
+
+        int h_ind = 0;
+
         if (len <= wh) {
-            QImage img(w, len / w + 1, QImage::Format_RGB32);
+            int img_w = w, img_h = len / w + 1;
+            QImage img(img_w, img_h, QImage::Format_RGB32);
             img.fill(0);
+
+            {
+                hilbert.clear();
+                char cmd[1024];
+                sprintf(cmd, "./hilbert.py %d %d > hilbert.pos", img_w, img_h);
+                system(cmd);
+                FILE *file = fopen("hilbert.pos", "r");
+                char line[1024];
+                while(fgets(line, 1024, file)) {
+                    char *p;
+                    p = strrchr(line, '\n'); if(p) *p = '\0';
+                    p = strrchr(line, '\r'); if(p) *p = '\0';
+                    int x, y;
+                    sscanf(line, "%d %d", &x, &y);
+                    hilbert.emplace_back(make_pair(x, y));
+                }
+                fclose(file);
+                unlink("hilbert.pos");
+            }
 
             auto p = (unsigned int *) img.bits();
 
@@ -96,16 +127,51 @@ void ImageView::set_data(const unsigned char *dat, long len) {
                     b = 0xff;
                 }
                 unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+#if 0
                 *p++ = v;
+#else
+                {
+                    if (h_ind >= hilbert.size()) abort();
+
+                    int x = hilbert[h_ind].first;
+                    int y = hilbert[h_ind++].second;
+                    int ind = y * w + x;
+                    if (ind < wh) {
+                        p[ind] = v;
+                    } else {
+                        abort();
+                    }
+                }
+#endif
             }
 #endif
+            printf("A %d %d %d %d\n", width(), height(), img.width(), img.height());
             img = img.scaled(size());
             setImage(img);
         } else {
             int sf = len / wh + 1;
-
-            QImage img(w, len / sf / w + 1, QImage::Format_RGB32);
+            int img_w = w, img_h = len / sf / w + 1;
+            QImage img(img_w, img_h, QImage::Format_RGB32);
             img.fill(0);
+
+            {
+                hilbert.clear();
+                char cmd[1024];
+                sprintf(cmd, "./hilbert.py %d %d > hilbert.pos", img_w, img_h);
+                system(cmd);
+                FILE *file = fopen("hilbert.pos", "r");
+                char line[1024];
+                while(fgets(line, 1024, file)) {
+                    char *p;
+                    p = strrchr(line, '\n'); if(p) *p = '\0';
+                    p = strrchr(line, '\r'); if(p) *p = '\0';
+                    int x, y;
+                    sscanf(line, "%d %d", &x, &y);
+                    hilbert.emplace_back(make_pair(x, y));
+                }
+                fclose(file);
+                unlink("hilbert.pos");
+            }
 
             auto p = (unsigned int *) img.bits();
 
@@ -158,9 +224,25 @@ void ImageView::set_data(const unsigned char *dat, long len) {
                 b = min(255, b / j) & 0xff;
 
                 unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+#if 0
                 *p++ = v;
+#else
+                {
+                    if (h_ind >= hilbert.size()) abort();
+
+                    int x = hilbert[h_ind].first;
+                    int y = hilbert[h_ind++].second;
+                    int ind = y * w + x;
+                    if (ind < wh) {
+                        p[ind] = v;
+                    } else {
+                        abort();
+                    }
+                }
+#endif
             }
 #endif
+            printf("B %d %d %d %d\n", width(), height(), img.width(), img.height());
             img = img.scaled(size());
             setImage(img);
         }
