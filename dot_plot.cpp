@@ -34,12 +34,11 @@ using std::random_shuffle;
 using std::pair;
 using std::make_pair;
 
-vector<pair<int, int> > pts;
-int pts_i = 0;
-
 DotPlot::DotPlot(QWidget *p)
         : QLabel(p),
-          dat_(nullptr), dat_n_(0) {
+          dat_(nullptr), dat_n_(0),
+          mat_(nullptr),
+          pts_i_(0) {
     {
         auto layout = new QGridLayout(this);
         int r = 0;
@@ -165,28 +164,33 @@ void DotPlot::setData(const unsigned char *dat, long n) {
     // parameters_changed();
 }
 
-int *mat = nullptr;
-
 void DotPlot::parameters_changed() {
     puts("called");
-    delete[] mat;
-    mat = nullptr;
+    delete[] mat_;
+    mat_ = nullptr;
 
     long mdw = min(dat_n_, (long) width_->value());
     int mwh = min(min(width(), height()), (int) mdw);
 
     // Could avoid re-allocation if size has not changed.
-    mat = new int[mwh * mwh];
-    memset(mat, 0, sizeof(mat[0]) * mwh * mwh);
+    mat_ = new int[mwh * mwh];
+    memset(mat_, 0, sizeof(mat_[0]) * mwh * mwh);
 
-    pts.clear();
-    pts.reserve(mwh * mwh);
+    pts_.clear();
+    pts_.reserve(mwh * mwh);
+#if 1
     for (int i = 0; i < mwh; i++) {
         for (int j = i; j < mwh; j++) {
-            pts.emplace_back(make_pair(i, j));
+            pts_.emplace_back(make_pair(i, j));
         }
     }
-    random_shuffle(pts.begin(), pts.end());
+#else
+    for (int i = 0; i < mwh; i++) {
+        pts_.emplace_back(make_pair(i, mwh-i-1));
+        pts_.emplace_back(make_pair(i, i));
+    }
+#endif
+    random_shuffle(pts_.begin(), pts_.end());
 
     {
         float sf = 1.f;
@@ -194,7 +198,9 @@ void DotPlot::parameters_changed() {
             sf = mwh / float(mdw);
         }
 
-        int xyn = 1 / sf;
+        int xyn = 1 / sf + 1;
+
+        printf("min(width(), height()): %d mwh:%d mdw:%d dat_n:%d sf:%f xyn:%d", min(width(), height()), mwh, mdw, dat_n_, sf, xyn);
 
         // Precompute some random values for sampling
         std::vector<int> rand;
@@ -207,10 +213,10 @@ void DotPlot::parameters_changed() {
             }
         }
 
-        printf("pts.size(): %d\n", pts.size());
-        // pts_i is decremented in advance_mat()
-        pts_i = pts.size();
-        while (pts_i > 0) {
+        printf("pts_.size(): %d sf: %f\n", pts_.size(), sf);
+        // pts_i_ is decremented in advance_mat()
+        pts_i_ = pts_.size();
+        while (pts_i_ > 0) {
 //            random_shuffle(rand.begin(), rand.end());
             advance_mat(mwh, sf, rand);
         }
@@ -219,10 +225,10 @@ void DotPlot::parameters_changed() {
 }
 
 void DotPlot::advance_mat(int mwh, float sf, const vector<int> &rand) {
-    if (pts_i == 0 || pts.empty()) return;
+    if (pts_i_ == 0 || pts_.empty()) return;
 
-    pts_i--;
-    pair<int, int> pt = pts[pts_i];
+    pts_i_--;
+    pair<int, int> pt = pts_[pts_i_];
 
     int x = pt.first;
     int y = pt.second;
@@ -237,8 +243,8 @@ void DotPlot::advance_mat(int mwh, float sf, const vector<int> &rand) {
         if (dat_[i] == dat_[j]) {
             int ii = y * mwh + x;
             int jj = x * mwh + y;
-            if (0 <= ii && ii < mwh * mwh) mat[ii]++;
-            if (0 <= jj && jj < mwh * mwh) mat[jj]++;
+            if (0 <= ii && ii < mwh * mwh) mat_[ii]++;
+            if (0 <= jj && jj < mwh * mwh) mat_[jj]++;
         }
     }
 }
@@ -255,11 +261,11 @@ void DotPlot::regen_image() {
     for (int j = 0; j < mwh; j++) {
         for (int i = 0; i < j; i++) {
             int k = j * mwh + i;
-            if (m < mat[k]) m = mat[k];
+            if (m < mat_[k]) m = mat_[k];
         }
         for (int i = j + 1; i < mwh; i++) {
             int k = j * mwh + i;
-            if (m < mat[k]) m = mat[k];
+            if (m < mat_[k]) m = mat_[k];
         }
     }
 
@@ -272,7 +278,7 @@ void DotPlot::regen_image() {
     img.fill(0);
     auto p = (unsigned int *) img.bits();
     for (int i = 0; i < mwh * mwh; i++) {
-        int c = min(255, int(mat[i] / float(m) * 255. + .5));
+        int c = min(255, int(mat_[i] / float(m) * 255. + .5));
         unsigned char r = c;
         unsigned char g = c;
         unsigned char b = c;

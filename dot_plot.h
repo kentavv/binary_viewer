@@ -62,6 +62,9 @@ protected:
     QSpinBox *offset1_, *offset2_, *width_, *max_samples_;
     const unsigned char *dat_;
     long dat_n_;
+    int *mat_;
+    std::vector<std::pair<int, int> > pts_;
+    int pts_i_;
 };
 
 #endif
