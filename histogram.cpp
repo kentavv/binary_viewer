@@ -265,7 +265,7 @@ void hist_float_helper_3d(int *hist, T *dat_f, long n, int st) {
 /// @param [in] overlap Whether to move by a single byte (true) or length of dtype (false) (not implemented correctly.)
 /// @return The 2d histogram, as a linearized matrix of size 256 * 256, containing counts of each digram,
 int *generate_histo_3d(const unsigned char *dat_u8, long n, histo_dtype_t dtype, bool overlap) {
-    int *hist = new int[256 * 256 * 256];
+    auto hist = new int[256 * 256 * 256];
     memset(hist, 0, sizeof(hist[0]) * 256 * 256 * 256);
 
     int st = overlap ? 1 : 3;
