@@ -20,6 +20,8 @@ add_executable(binary_viewer
         dot_plot.h
         graph_view.cpp
         graph_view.h
+        hilbert.cpp
+        hilbert.h
         histogram.cpp
         histogram.h
         image_view.cpp

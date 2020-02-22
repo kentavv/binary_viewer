@@ -21,6 +21,7 @@
 
 #include <QtGui>
 
+#include "hilbert.h"
 #include "image_view.h"
 
 using std::max;
@@ -50,9 +51,9 @@ void ImageView::setImage(QImage &img) {
     update();
 }
 
-vector<pair<int, int> > hilbert;
-
 void ImageView::set_data(const unsigned char *dat, long len) {
+    vector<pair<int, int> > hilbert;
+
     int w = width();
     int h = height();
 
@@ -71,24 +72,7 @@ void ImageView::set_data(const unsigned char *dat, long len) {
             QImage img(img_w, img_h, QImage::Format_RGB32);
             img.fill(0);
 
-            {
-                hilbert.clear();
-                char cmd[1024];
-                sprintf(cmd, "./hilbert.py %d %d > hilbert.pos", img_w, img_h);
-                system(cmd);
-                FILE *file = fopen("hilbert.pos", "r");
-                char line[1024];
-                while(fgets(line, 1024, file)) {
-                    char *p;
-                    p = strrchr(line, '\n'); if(p) *p = '\0';
-                    p = strrchr(line, '\r'); if(p) *p = '\0';
-                    int x, y;
-                    sscanf(line, "%d %d", &x, &y);
-                    hilbert.emplace_back(make_pair(x, y));
-                }
-                fclose(file);
-                unlink("hilbert.pos");
-            }
+            gilbert2d(img_w, img_h, hilbert);
 
             auto p = (unsigned int *) img.bits();
 
@@ -154,24 +138,7 @@ void ImageView::set_data(const unsigned char *dat, long len) {
             QImage img(img_w, img_h, QImage::Format_RGB32);
             img.fill(0);
 
-            {
-                hilbert.clear();
-                char cmd[1024];
-                sprintf(cmd, "./hilbert.py %d %d > hilbert.pos", img_w, img_h);
-                system(cmd);
-                FILE *file = fopen("hilbert.pos", "r");
-                char line[1024];
-                while(fgets(line, 1024, file)) {
-                    char *p;
-                    p = strrchr(line, '\n'); if(p) *p = '\0';
-                    p = strrchr(line, '\r'); if(p) *p = '\0';
-                    int x, y;
-                    sscanf(line, "%d %d", &x, &y);
-                    hilbert.emplace_back(make_pair(x, y));
-                }
-                fclose(file);
-                unlink("hilbert.pos");
-            }
+            gilbert2d(img_w, img_h, hilbert);
 
             auto p = (unsigned int *) img.bits();
 
