@@ -35,94 +35,102 @@ using std::signbit;
 using std::isinf;
 
 
-View3D::View3D(QWidget *p)
-        : QGLWidget(p), hist_(NULL), dat_(NULL), dat_n_(0), spinning_(true) {
-    QTimer *update_timer = new QTimer(this);
-    QObject::connect(update_timer, SIGNAL(timeout()), this, SLOT(updateGL())); //, Qt::QueuedConnection);
-    update_timer->start(100);
-
-    {
-        QGridLayout *layout = new QGridLayout(this);
-        {
-            QLabel *l = new QLabel("Threshold");
-            l->setFixedSize(l->sizeHint());
-            layout->addWidget(l, 0, 0);
-        }
-        {
-            QSpinBox *sb = new QSpinBox;
-            sb->setFixedSize(sb->sizeHint());
-            sb->setFixedWidth(sb->width() * 1.5);
-            sb->setRange(1, 10000);
-            sb->setValue(4);
-            thresh_ = sb;
-            layout->addWidget(sb, 0, 1);
-        }
-        {
-            QLabel *l = new QLabel("Scale");
-            l->setFixedSize(l->sizeHint());
-            layout->addWidget(l, 1, 0);
-        }
-        {
-            QSpinBox *sb = new QSpinBox;
-            sb->setFixedSize(sb->sizeHint());
-            sb->setFixedWidth(sb->width() * 1.5);
-            sb->setRange(1, 10000);
-            sb->setValue(100);
-            scale_ = sb;
-            layout->addWidget(sb, 1, 1);
-        }
-        {
-            QLabel *l = new QLabel("Type");
-            l->setFixedSize(l->sizeHint());
-            layout->addWidget(l, 2, 0);
-        }
-        {
-            QComboBox *cb = new QComboBox;
-            cb->setFixedSize(cb->sizeHint());
-            cb->addItem("U8");
-            cb->addItem("U12");
-            cb->addItem("U16");
-            cb->addItem("U32");
-            cb->addItem("U64");
-            cb->addItem("F32");
-            cb->addItem("F64");
-            cb->setCurrentIndex(0);
-            cb->setEditable(false);
-            type_ = cb;
-            layout->addWidget(cb, 2, 1);
-        }
-        {
-            QLabel *l = new QLabel("Overlap");
-            l->setFixedSize(l->sizeHint());
-            layout->addWidget(l, 3, 0);
-        }
-        {
-            QCheckBox *cb = new QCheckBox;
-            cb->setChecked(true);
-            overlap_ = cb;
-            layout->addWidget(cb, 3, 1);
-        }
-
-        layout->setColumnStretch(2, 1);
-        layout->setRowStretch(4, 1);
-
-        QObject::connect(thresh_, SIGNAL(valueChanged(int)), this, SLOT(parameters_changed()));
-        QObject::connect(scale_, SIGNAL(valueChanged(int)), this, SLOT(parameters_changed()));
-        QObject::connect(type_, SIGNAL(currentIndexChanged(int)), this, SLOT(regen_histo()));
-        QObject::connect(overlap_, SIGNAL(toggled(bool)), this, SLOT(regen_histo()));
-    }
-}
-
-View3D::~View3D() {
-    if (hist_) delete[] hist_;
-}
-
 static float alpha = 0;
 static float alpha2 = 0;
 
-static GLfloat *vertices = NULL;
-static GLfloat *colors = NULL;
+static GLfloat *vertices = nullptr;
+static GLfloat *colors = nullptr;
 int n_vertices = 0;
+
+View3D::View3D(QWidget *p)
+        : QGLWidget(p), hist_(nullptr), dat_(nullptr), dat_n_(0), spinning_(true) {
+    auto update_timer = new QTimer(this);
+    QObject::connect(update_timer, SIGNAL(timeout()), this, SLOT(updateGL())); //, Qt::QueuedConnection);
+    update_timer->start(100);
+
+    auto layout = new QGridLayout(this);
+    int r = 0;
+    {
+        auto l = new QLabel("Threshold");
+        l->setFixedSize(l->sizeHint());
+        layout->addWidget(l, r, 0);
+    }
+    {
+        auto sb = new QSpinBox;
+        sb->setFixedSize(sb->sizeHint());
+        sb->setFixedWidth(sb->width() * 1.5);
+        sb->setRange(1, 10000);
+        sb->setValue(4);
+        thresh_ = sb;
+        layout->addWidget(sb, r, 1);
+    }
+    r++;
+
+    {
+        auto l = new QLabel("Scale");
+        l->setFixedSize(l->sizeHint());
+        layout->addWidget(l, r, 0);
+    }
+    {
+        auto sb = new QSpinBox;
+        sb->setFixedSize(sb->sizeHint());
+        sb->setFixedWidth(sb->width() * 1.5);
+        sb->setRange(1, 10000);
+        sb->setValue(100);
+        scale_ = sb;
+        layout->addWidget(sb, r, 1);
+    }
+    r++;
+
+    {
+        auto l = new QLabel("Type");
+        l->setFixedSize(l->sizeHint());
+        layout->addWidget(l, r, 0);
+    }
+    {
+        auto cb = new QComboBox;
+        cb->setFixedSize(cb->sizeHint());
+        cb->addItem("U8");
+        cb->addItem("U12");
+        cb->addItem("U16");
+        cb->addItem("U32");
+        cb->addItem("U64");
+        cb->addItem("F32");
+        cb->addItem("F64");
+        cb->setCurrentIndex(0);
+        cb->setEditable(false);
+        type_ = cb;
+        layout->addWidget(cb, r, 1);
+    }
+    r++;
+
+    {
+        auto l = new QLabel("Overlap");
+        l->setFixedSize(l->sizeHint());
+        layout->addWidget(l, r, 0);
+    }
+    {
+        auto cb = new QCheckBox;
+        cb->setChecked(true);
+        overlap_ = cb;
+        layout->addWidget(cb, r, 1);
+    }
+    r++;
+
+    layout->setColumnStretch(2, 1);
+    layout->setRowStretch(r, 1);
+
+    QObject::connect(thresh_, SIGNAL(valueChanged(int)), this, SLOT(parameters_changed()));
+    QObject::connect(scale_, SIGNAL(valueChanged(int)), this, SLOT(parameters_changed()));
+    QObject::connect(type_, SIGNAL(currentIndexChanged(int)), this, SLOT(regen_histo()));
+    QObject::connect(overlap_, SIGNAL(toggled(bool)), this, SLOT(regen_histo()));
+}
+
+View3D::~View3D() {
+    delete[] hist_;
+    delete[] vertices;
+    delete[] colors;
+}
 
 void View3D::setData(const unsigned char *dat, long n) {
     dat_ = dat;
@@ -238,10 +246,8 @@ void View3D::paintGL() {
 }
 
 void View3D::regen_histo() {
-    if (hist_) {
-        delete[] hist_;
-        hist_ = NULL;
-    }
+    delete[] hist_;
+    hist_ = nullptr;
 
     histo_dtype_t t = string_to_histo_dtype(type_->currentText().toStdString());
 
@@ -260,13 +266,12 @@ void View3D::parameters_changed() {
             n_vertices++;
         }
     }
-    if (vertices) {
-        delete[] vertices;
-        delete[] colors;
 
-        vertices = NULL;
-        colors = NULL;
-    }
+    delete[] vertices;
+    vertices = nullptr;
+    delete[] colors;
+    colors = nullptr;
+
     if (n_vertices > 0) {
         vertices = new GLfloat[n_vertices * 3];
         colors = new GLfloat[n_vertices * 3];
