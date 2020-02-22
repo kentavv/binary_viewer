@@ -33,7 +33,7 @@ Q_OBJECT
 public:
     explicit DotPlot(QWidget *p = nullptr);
 
-    ~DotPlot() override = default;
+    ~DotPlot() override;
 
 public slots:
 
@@ -45,7 +45,7 @@ protected slots:
 
     void setImage(QImage &img);
 
-    void advance_mat(int mwh, float sf, const std::vector<int> &rand);
+    void advance_mat(int bs, const std::vector<std::pair<int, int> > &rand);
 
     void regen_image();
 
@@ -63,6 +63,8 @@ protected:
     const unsigned char *dat_;
     long dat_n_;
     int *mat_;
+    int mat_max_n_;
+    int mat_n_;
     std::vector<std::pair<int, int> > pts_;
     int pts_i_;
 };
