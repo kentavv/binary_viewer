@@ -24,31 +24,33 @@
 #include <QGridLayout>
 #include <QSpinBox>
 #include <QComboBox>
+#include <QPushButton>
 
 #include "dot_plot.h"
 
+using std::max;
 using std::min;
 using std::vector;
 using std::random_shuffle;
 using std::pair;
 using std::make_pair;
 
-vector<pair<int, int> > pts;
-int pts_i = 0;
-
 DotPlot::DotPlot(QWidget *p)
         : QLabel(p),
-          dat_(NULL), dat_n_(0) {
+          dat_(nullptr), dat_n_(0),
+          mat_(nullptr), mat_max_n_(0), mat_n_(0),
+          pts_i_(0) {
     {
-        QGridLayout *layout = new QGridLayout(this);
+        auto layout = new QGridLayout(this);
         int r = 0;
+
         {
-            QLabel *l = new QLabel("Offset1 (B)");
+            auto l = new QLabel("Offset1 (B)");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, r, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(0, 100000);
@@ -57,13 +59,14 @@ DotPlot::DotPlot(QWidget *p)
             layout->addWidget(sb, r, 1);
         }
         r++;
+
         {
-            QLabel *l = new QLabel("Offset2 (B)");
+            auto l = new QLabel("Offset2 (B)");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, r, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(0, 100000);
@@ -72,13 +75,14 @@ DotPlot::DotPlot(QWidget *p)
             layout->addWidget(sb, r, 1);
         }
         r++;
+
         {
-            QLabel *l = new QLabel("Width");
+            auto l = new QLabel("Width");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, r, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(1, 100000);
@@ -87,19 +91,28 @@ DotPlot::DotPlot(QWidget *p)
             layout->addWidget(sb, r, 1);
         }
         r++;
+
         {
-            QLabel *l = new QLabel("Max Samples");
+            auto l = new QLabel("Max Samples");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, r, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(1, 100000);
             sb->setValue(10);
             max_samples_ = sb;
             layout->addWidget(sb, r, 1);
+        }
+        r++;
+
+        {
+            auto pb = new QPushButton("Resample");
+            pb->setFixedSize(pb->sizeHint());
+            layout->addWidget(pb, r, 1);
+            QObject::connect(pb, SIGNAL(clicked()), this, SLOT(parameters_changed()));
         }
         r++;
 
@@ -114,6 +127,7 @@ DotPlot::DotPlot(QWidget *p)
 }
 
 DotPlot::~DotPlot() {
+    delete[] mat_;
 }
 
 void DotPlot::setImage(QImage &img) {
@@ -138,10 +152,20 @@ void DotPlot::paintEvent(QPaintEvent *e) {
 void DotPlot::resizeEvent(QResizeEvent *e) {
     QLabel::resizeEvent(e);
 
+    int tmp = min(width(), height());
+    if (tmp != mat_max_n_) {
+        delete[] mat_;
+        mat_max_n_ = tmp;
+        mat_n_ = 0;
+        mat_ = new int[mat_max_n_ * mat_max_n_];
+    }
+
     parameters_changed();
 }
 
 void DotPlot::update_pix() {
+    if (img_.isNull()) return;
+
     pix_ = QPixmap::fromImage(img_.scaled(size())); //, Qt::KeepAspectRatio);
     setPixmap(pix_);
 }
@@ -157,116 +181,193 @@ void DotPlot::setData(const unsigned char *dat, long n) {
 
     width_->setValue(dat_n_);
 
-    parameters_changed();
-
-    for (int i = 0; i < pts_i; i++) {
-        advance_mat();
-    }
-    regen_image();
+    // parameters_changed() triggered by the previous setValue() call.
+    // parameters_changed();
 }
-
-int *mat = NULL;
 
 void DotPlot::parameters_changed() {
-    if (mat) {
-        delete[] mat;
-        mat = NULL;
-    }
-
-    int mwh = min(width(), height());
+    puts("called");
 
     long mdw = min(dat_n_, (long) width_->value());
+    int bs = int(mdw / mat_max_n_) + ((mdw % mat_max_n_) > 0 ? 1 : 0);
+    mat_n_ = 0;
 
-    if (mwh > mdw) mwh = mdw;
-
-    if (mat == NULL) {
-        mat = new int[mwh * mwh];
-        memset(mat, 0, sizeof(mat[0]) * mwh * mwh);
+    if (dat_n_ > 0) {
+        mat_n_ = min(int(mdw / bs), mat_max_n_);
+        printf("Setting max to %d\n", bs);
+        max_samples_->setMaximum(bs);
     }
 
-    pts.clear();
-    for (int i = 0; i < mwh; i++) {
-        for (int j = i; j < mwh; j++) {
-            pts.push_back(make_pair(i, j));
+    printf("dat_n_%d mdw:%d mat_max_n_:%d bs:%d mat_n_:%d bs * mat_n_:%d\n", dat_n_, mdw, mat_max_n_, bs, mat_n_, bs * mat_n_);
+
+    memset(mat_, 0, sizeof(mat_[0]) * mat_max_n_ * mat_max_n_);
+
+    pts_.clear();
+    pts_.reserve(mat_n_ * mat_n_);
+#if 1
+    for (int i = 0; i < mat_n_; i++) {
+        for (int j = i; j < mat_n_; j++) {
+            pts_.emplace_back(make_pair(i, j));
         }
     }
-    pts_i = pts.size();
-    random_shuffle(pts.begin(), pts.end());
+#else
+    for (int i = 0; i < mat_n_; i++) {
+        pts_.emplace_back(make_pair(i, mat_n_-i-1));
+//        pts_.emplace_back(make_pair(i, i));
+    }
+#endif
+    random_shuffle(pts_.begin(), pts_.end());
 
-    // pts_i is decremented in advance_mat()
-    while (pts_i > 0) {
-        advance_mat();
+    {
+//        float sf = 1.f;
+//        if (mwh < mdw) {
+//            sf = mwh / float(mdw);
+//        }
+//
+//        int xyn = 1 / sf + 1;
+
+//        printf("min(width(), height()): %d mwh:%d mdw:%d dat_n:%d sf:%f xyn:%d", min(width(), height()), mwh, mdw, dat_n_, sf, xyn);
+
+
+//        printf("pts_.size(): %d sf: %f\n", pts_.size(), sf);
+        // pts_i_ is decremented in advance_mat()
+        pts_i_ = pts_.size();
+        int ii = 0;
+        // Precompute some random values for sampling
+        std::vector<pair<int, int> > rand;
+        while (pts_i_ > 0) {
+            if ((ii++ % 100) == 0) {
+                {
+                    int n = min(max_samples_->value(), bs);
+//            n = n * n;
+                    rand.clear();
+                    rand.reserve(n);
+                    printf("Generating %d points in range [0, %d-1] along the diagonal\n", n, bs);
+                    for (int tt = 0; tt < n; tt++) {
+                        int a = random() % bs;
+                        rand.emplace_back(make_pair(a, a));
+                    }
+                    int n2 = min(max_samples_->value(), bs * bs - bs);
+                    printf("Generating %d points in range [0, %d-1] off the diagonal\n", n2, bs);
+                    for (int tt = 0; tt < n2;) {
+                        int a = random() % bs;
+                        int b = random() % bs;
+                        if (a == b) continue;
+                        rand.emplace_back(make_pair(a, b));
+                        tt++;
+                    }
+//            for (int tt = 0; tt < n; tt++) {
+//                rand.emplace_back(make_pair(random() % bs, random() % bs));
+//            }
+                }
+            }
+
+
+//            random_shuffle(rand.begin(), rand.end());
+            advance_mat(bs, rand);
+        }
     }
     regen_image();
 }
 
-void DotPlot::advance_mat() {
-    if (pts_i == 0 || pts.empty()) return;
+void DotPlot::advance_mat(int bs, const vector<pair<int, int> > &rand) {
+    if (pts_i_ == 0 || pts_.empty()) return;
 
-    pts_i--;
-    pair<int, int> pt = pts[pts_i];
-
-    int mwh = min(width(), height());
-    float sf = 1.;
-    {
-        long mdw = min(dat_n_, (long) width_->value());
-        if (mwh > mdw) mwh = mdw;
-        if (mwh < mdw) {
-            sf = mwh / float(mdw);
-        }
-    }
+    pts_i_--;
+    pair<int, int> pt = pts_[pts_i_];
 
     int x = pt.first;
     int y = pt.second;
 
-    int xo = x / sf;
-    int yo = y / sf;
-    int xyn = 1 / sf;
+    int xo = x * bs;
+    int yo = y * bs;
 
-    for (int tt = 0; tt < min(max_samples_->value(), xyn * xyn); tt++) {
-        int i = random() % xyn + xo;
-        int j = random() % xyn + yo;
+    if (true) {
+//        for (int tt = 0; tt < bs; tt++) {
+//            int i = xo + tt;
+//            int j = yo + tt;
+//
+//            if (dat_[i] == dat_[j]) {
+//                int ii = y * mat_n_ + x;
+//                int jj = x * mat_n_ + y;
+//                if (0 <= ii && ii < mat_n_ * mat_n_) mat_[ii]++;
+//                if (0 <= jj && jj < mat_n_ * mat_n_) mat_[jj]++;
+//            }
+////            printf("%d %d %d %d %d %d %d %d\n", xo, yo, tt, rand[tt], i, j, dat_[i], dat_[j]);
+//        }
+        for (int tt = 0; tt < rand.size(); tt++) {
+            int i = xo + rand[tt].first;
+            int j = yo + rand[tt].second;
+//            int i = xo + (random() % bs);
+//            int j = yo + (random() % bs);
 
-        {
             if (dat_[i] == dat_[j]) {
-                int ii = y * mwh + x;
-                if (ii < 0 || mwh * mwh <= ii) {
-                    continue;
-                }
-                mat[ii]++;
+                int ii = y * mat_n_ + x;
+                int jj = x * mat_n_ + y;
+                if (0 <= ii && ii < mat_n_ * mat_n_) mat_[ii]++;
+                if (0 <= jj && jj < mat_n_ * mat_n_) mat_[jj]++;
+            }
+//            printf("%d %d %d %d %d %d %d %d\n", xo, yo, tt, rand[tt], i, j, dat_[i], dat_[j]);
+        }
+    } else {
+        for (int tt1 = 0; tt1 < bs; tt1++) {
+            for (int tt2 = 0; tt2 < bs; tt2++) {
+                int i = xo + tt1;
+                int j = yo + tt2;
 
-                int jj = x * mwh + y;
-                if (jj < 0 || mwh * mwh <= jj) {
-                    continue;
+                if (dat_[i] == dat_[j]) {
+                    int ii = y * mat_n_ + x;
+                    int jj = x * mat_n_ + y;
+                    if (0 <= ii && ii < mat_n_ * mat_n_) mat_[ii]++;
+//                    else abort();
+                    if (0 <= jj && jj < mat_n_ * mat_n_) mat_[jj]++;
+//                    else abort();
                 }
-                mat[jj]++;
+                printf("%d %d %d %d %d %d %d %d\n", xo, yo, tt1, tt2, i, j, dat_[i], dat_[j]);
             }
         }
     }
 }
 
 void DotPlot::regen_image() {
-    int mwh = min(width(), height());
-    long mdw = min(dat_n_, (long) width_->value());
-
-    if (mwh > mdw) mwh = mdw;
-
+    // Find the maximum value, ignoring the diagonal.
+    // Could stop the search once m = max_samples_->value()
     int m = 0;
-    for (int i = 0; i < mwh * mwh; i++) {
-        if (m < mat[i]) m = mat[i];
+    for (int j = 0; j < mat_n_; j++) {
+        for (int i = 0; i < j; i++) {
+            int k = j * mat_n_ + i;
+            if (m < mat_[k]) m = mat_[k];
+        }
+        for (int i = j + 1; i < mat_n_; i++) {
+            int k = j * mat_n_ + i;
+            if (m < mat_[k]) m = mat_[k];
+        }
     }
 
-    QImage img(mwh, mwh, QImage::Format_RGB32);
+    printf("max(1): %d\n", m);
+    if (true) {
+        // Brighten image
+        m = max(1, int(m * .75));
+        printf("max(2): %d\n", m);
+    }
+
+    QImage img(mat_n_, mat_n_, QImage::Format_RGB32);
     img.fill(0);
-    unsigned int *p = (unsigned int *) img.bits();
-    for (int i = 0; i < mwh * mwh; i++) {
-        unsigned char c = mat[i] / float(m) * 255.;
+    auto p = (unsigned int *) img.bits();
+    for (int i = 0; i < mat_n_ * mat_n_; i++) {
+        int c = min(255, int(mat_[i] / float(m) * 255. + .5));
         unsigned char r = c;
         unsigned char g = c;
         unsigned char b = c;
         unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
         *p++ = v;
     }
+
+    img.save("a.png");
+
+//    long mdw = min(dat_n_, (long) width_->value());
+//    int mwh = min(width(), height());
+//    if (mwh > mdw) mwh = mdw;
 
     setImage(img);
 }

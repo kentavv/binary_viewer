@@ -34,16 +34,16 @@ using std::isinf;
 
 ImageView2::ImageView2(QWidget *p)
         : QLabel(p),
-          hist_(NULL), dat_(NULL), dat_n_(0) {
+          hist_(nullptr), dat_(nullptr), dat_n_(0) {
     {
-        QGridLayout *layout = new QGridLayout(this);
+        auto layout = new QGridLayout(this);
         {
-            QLabel *l = new QLabel("Threshold");
+            auto l = new QLabel("Threshold");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, 0, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(1, 10000);
@@ -52,12 +52,12 @@ ImageView2::ImageView2(QWidget *p)
             layout->addWidget(sb, 0, 1);
         }
         {
-            QLabel *l = new QLabel("Scale");
+            auto l = new QLabel("Scale");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, 1, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(1, 10000);
@@ -66,12 +66,12 @@ ImageView2::ImageView2(QWidget *p)
             layout->addWidget(sb, 1, 1);
         }
         {
-            QLabel *l = new QLabel("Type");
+            auto l = new QLabel("Type");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, 2, 0);
         }
         {
-            QComboBox *cb = new QComboBox;
+            auto cb = new QComboBox;
             cb->setFixedSize(cb->sizeHint());
             cb->addItem("U8");
             cb->addItem("U16");
@@ -95,7 +95,7 @@ ImageView2::ImageView2(QWidget *p)
 }
 
 ImageView2::~ImageView2() {
-    if (hist_) delete[] hist_;
+    delete[] hist_;
 }
 
 void ImageView2::setImage(QImage &img) {
@@ -124,6 +124,8 @@ void ImageView2::resizeEvent(QResizeEvent *e) {
 }
 
 void ImageView2::update_pix() {
+    if (img_.isNull()) return;
+
     int vw = width();
     int vh = height();
     pix_ = QPixmap::fromImage(img_).scaled(vw, vh); //, Qt::KeepAspectRatio);
@@ -138,21 +140,10 @@ void ImageView2::setData(const unsigned char *dat, long n) {
 }
 
 void ImageView2::regen_histo() {
-    if (hist_) {
-        delete[] hist_;
-        hist_ = NULL;
-    }
+    delete[] hist_;
+    hist_ = nullptr;
 
-    histo_dtype_t t;
-    QString s = type_->currentText();
-    if (s == "U8") t = u8;
-    else if (s == "U16") t = u16;
-    else if (s == "U32") t = u32;
-    else if (s == "U64") t = u64;
-    else if (s == "F32") t = f32;
-    else if (s == "F64") t = f64;
-    else t = none;
-
+    histo_dtype_t t = string_to_histo_dtype(type_->currentText().toStdString());
     hist_ = generate_histo_2d(dat_, dat_n_, t);
 
     parameters_changed();
@@ -165,7 +156,7 @@ void ImageView2::parameters_changed() {
     QImage img(256, 256, QImage::Format_RGB32);
     img.fill(0);
 
-    unsigned int *p = (unsigned int *) img.bits();
+    auto p = (unsigned int *) img.bits();
 
     for (int i = 0; i < 256 * 256; i++, p++) {
         if (hist_[i] >= thresh) {

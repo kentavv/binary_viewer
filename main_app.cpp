@@ -250,7 +250,7 @@ void MainApp::update_views(bool update_iv1) {
 
     {
         long n;
-        float *dd = generate_entropy(bin_ + start_, end_ - start_, n);
+        auto dd = generate_entropy(bin_ + start_, end_ - start_, n);
         if (dd != nullptr) {
             iv2e_->set_data(0, dd, n);
             delete[] dd;
@@ -258,7 +258,7 @@ void MainApp::update_views(bool update_iv1) {
     }
 
     {
-        float *dd = generate_histo(bin_ + start_, end_ - start_);
+        auto dd = generate_histo(bin_ + start_, end_ - start_);
         if (dd != nullptr) {
             iv2e_->set_data(1, dd, 256, false);
             delete[] dd;

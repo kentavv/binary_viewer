@@ -28,16 +28,16 @@
 
 ImageView3::ImageView3(QWidget *p)
         : QLabel(p),
-          dat_(NULL), dat_n_(0), inverted_(true) {
+          dat_(nullptr), dat_n_(0), inverted_(true) {
     {
-        QGridLayout *layout = new QGridLayout(this);
+        auto layout = new QGridLayout(this);
         {
-            QLabel *l = new QLabel("Offset (B)");
+            auto l = new QLabel("Offset (B)");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, 0, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(0, 100000);
@@ -46,12 +46,12 @@ ImageView3::ImageView3(QWidget *p)
             layout->addWidget(sb, 0, 1);
         }
         {
-            QLabel *l = new QLabel("Width");
+            auto l = new QLabel("Width");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, 1, 0);
         }
         {
-            QSpinBox *sb = new QSpinBox;
+            auto sb = new QSpinBox;
             sb->setFixedSize(sb->sizeHint());
             sb->setFixedWidth(sb->width() * 1.5);
             sb->setRange(1, 10000);
@@ -60,12 +60,12 @@ ImageView3::ImageView3(QWidget *p)
             layout->addWidget(sb, 1, 1);
         }
         {
-            QLabel *l = new QLabel("Type");
+            auto l = new QLabel("Type");
             l->setFixedSize(l->sizeHint());
             layout->addWidget(l, 2, 0);
         }
         {
-            QComboBox *cb = new QComboBox;
+            auto cb = new QComboBox;
             cb->setFixedSize(cb->sizeHint());
             cb->addItem("RGB 8");
             cb->addItem("RGB 12");
@@ -122,9 +122,6 @@ ImageView3::ImageView3(QWidget *p)
     }
 }
 
-ImageView3::~ImageView3() {
-}
-
 void ImageView3::setImage(QImage &img) {
     img_ = img;
 
@@ -151,9 +148,9 @@ void ImageView3::resizeEvent(QResizeEvent *e) {
 }
 
 void ImageView3::update_pix() {
-    //img_.scaled(size()).save("test.png", "png");
+    if (img_.isNull()) return;
+
     pix_ = QPixmap::fromImage(img_.scaled(size())); //, Qt::KeepAspectRatio);
-    //pix_ = QPixmap::fromImage(img_);
     setPixmap(pix_);
 }
 

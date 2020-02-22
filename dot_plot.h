@@ -20,6 +20,8 @@
 #ifndef _DOTPLOT_H_
 #define _DOTPLOT_H_
 
+#include <vector>
+
 #include <QLabel>
 #include <QImage>
 #include <QPixmap>
@@ -43,7 +45,7 @@ protected slots:
 
     void setImage(QImage &img);
 
-    void advance_mat();
+    void advance_mat(int bs, const std::vector<std::pair<int, int> > &rand);
 
     void regen_image();
 
@@ -57,13 +59,14 @@ protected:
 
     void update_pix();
 
-    typedef enum {
-        none, rgb8, rgb16, rgba8, rgba16, bgr8, bgr16, bgra8, bgra16, grey8, grey16
-    } dtype_t;
-
     QSpinBox *offset1_, *offset2_, *width_, *max_samples_;
     const unsigned char *dat_;
     long dat_n_;
+    int *mat_;
+    int mat_max_n_;
+    int mat_n_;
+    std::vector<std::pair<int, int> > pts_;
+    int pts_i_;
 };
 
 #endif
