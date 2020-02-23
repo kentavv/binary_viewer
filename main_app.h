@@ -28,6 +28,8 @@ class Histogram2dView;
 
 class ImageView;
 
+class BinaryViewer;
+
 class DotPlot;
 
 class Histogram3dView;
@@ -70,6 +72,7 @@ protected:
     OverallView *overall_zoomed_;
     PlotView *plot_view_;
     Histogram2dView *histogram_2d_;
+    BinaryViewer *binary_viewer_;
     ImageView *image_view_;
     DotPlot *dot_plot_;
     Histogram3dView *histogram_3d_;
