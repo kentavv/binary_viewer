@@ -17,19 +17,19 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _IMAGE_VIEW_H_
-#define _IMAGE_VIEW_H_
+#ifndef _OVERALL_VIEW_H_
+#define _OVERALL_VIEW_H_
 
 #include <QLabel>
 #include <QImage>
 #include <QPixmap>
 
-class ImageView : public QLabel {
+class OverallView : public QLabel {
 Q_OBJECT
 public:
-    explicit ImageView(QWidget *p = nullptr);
+    explicit OverallView(QWidget *p = nullptr);
 
-    ~ImageView() override = default;
+    ~OverallView() override = default;
 
 public slots:
 

@@ -17,19 +17,19 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _GRAPH_VIEW_H_
-#define _GRAPH_VIEW_H_
+#ifndef _PLOT_VIEW_H_
+#define _PLOT_VIEW_H_
 
 #include <QLabel>
 #include <QImage>
 #include <QPixmap>
 
-class GraphView : public QLabel {
+class PlotView : public QLabel {
 Q_OBJECT
 public:
-    explicit GraphView(QWidget *p = nullptr);
+    explicit PlotView(QWidget *p = nullptr);
 
-    ~GraphView() override = default;
+    ~PlotView() override = default;
 
 public slots:
 

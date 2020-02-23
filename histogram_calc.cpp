@@ -24,7 +24,7 @@
 #include <cstring>
 #include <cstdlib>
 
-#include "histogram.h"
+#include "histogram_calc.h"
 
 using std::min;
 using std::max;

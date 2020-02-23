@@ -17,8 +17,8 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _IMAGE_VIEW3_H_
-#define _IMAGE_VIEW3_H_
+#ifndef _IMAGE_VIEW_H_
+#define _IMAGE_VIEW_H_
 
 #include <QLabel>
 #include <QImage>
@@ -28,12 +28,12 @@ class QSpinBox;
 
 class QComboBox;
 
-class ImageView3 : public QLabel {
+class ImageView : public QLabel {
 Q_OBJECT
 public:
-    explicit ImageView3(QWidget *p = nullptr);
+    explicit ImageView(QWidget *p = nullptr);
 
-    ~ImageView3() override = default;
+    ~ImageView() override = default;
 
 public slots:
 

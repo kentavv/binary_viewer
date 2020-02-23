@@ -20,25 +20,25 @@ add_executable(binary_viewer
         bayer.h
         dot_plot.cpp
         dot_plot.h
-        graph_view.cpp
-        graph_view.h
+        plot_view.cpp
+        plot_view.h
         hilbert.cpp
         hilbert.h
-        histogram.cpp
-        histogram.h
+        histogram_calc.cpp
+        histogram_calc.h
+        overall_view.cpp
+        overall_view.h
+        histogram_2d_view.cpp
+        histogram_2d_view.h
         image_view.cpp
         image_view.h
-        image_view2.cpp
-        image_view2.h
-        image_view3.cpp
-        image_view3.h
         main.cpp
         main_app.cpp
         main_app.h
         version.cpp
         version.h
-        view_3d.cpp
-        view_3d.h
+        histogram_3d_view.cpp
+        histogram_3d_view.h
         bin_viewer.qrc)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui OpenGL)

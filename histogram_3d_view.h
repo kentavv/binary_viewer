@@ -17,8 +17,8 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _VIEW_3D_H_
-#define _VIEW_3D_H_
+#ifndef _HISTOGRAM_3D_VIEW_
+#define _HISTOGRAM_3D_VIEW_
 
 #include <QGLWidget>
 
@@ -28,12 +28,12 @@ class QComboBox;
 
 class QCheckBox;
 
-class View3D : public QGLWidget {
+class Histogram3dView : public QGLWidget {
 Q_OBJECT
 public:
-    explicit View3D(QWidget *p = nullptr);
+    explicit Histogram3dView(QWidget *p = nullptr);
 
-    ~View3D() override;
+    ~Histogram3dView() override;
 
 public slots:
 

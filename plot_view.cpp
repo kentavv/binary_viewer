@@ -20,22 +20,22 @@
 #include <algorithm>
 #include <QtGui>
 
-#include "graph_view.h"
+#include "plot_view.h"
 
 using std::min;
 using std::max;
 
-GraphView::GraphView(QWidget *p)
+PlotView::PlotView(QWidget *p)
         : QLabel(p),
           m1_(0.), m2_(1.), px_(-1), py_(-1), ind_(0), s_(none), allow_selection_(true) {
 }
 
-void GraphView::enableSelection(bool v) {
+void PlotView::enableSelection(bool v) {
     allow_selection_ = v;
     update();
 }
 
-void GraphView::setImage(int ind, QImage &img) {
+void PlotView::setImage(int ind, QImage &img) {
     img_[ind] = img;
 
     update_pix();
@@ -43,12 +43,12 @@ void GraphView::setImage(int ind, QImage &img) {
     update();
 }
 
-void GraphView::set_data(const float *dat, long len, bool normalize) {
+void PlotView::set_data(const float *dat, long len, bool normalize) {
     ind_ = 0;
     set_data(0, dat, len, normalize);
 }
 
-void GraphView::set_data(int ind, const float *dat, long len, bool normalize) {
+void PlotView::set_data(int ind, const float *dat, long len, bool normalize) {
     int w = width();
     int h = height();
 
@@ -111,7 +111,7 @@ void GraphView::set_data(int ind, const float *dat, long len, bool normalize) {
     }
 }
 
-void GraphView::paintEvent(QPaintEvent *e) {
+void PlotView::paintEvent(QPaintEvent *e) {
     QLabel::paintEvent(e);
 
     QPainter p(this);
@@ -133,13 +133,13 @@ void GraphView::paintEvent(QPaintEvent *e) {
     }
 }
 
-void GraphView::resizeEvent(QResizeEvent *e) {
+void PlotView::resizeEvent(QResizeEvent *e) {
     QLabel::resizeEvent(e);
 
     update_pix();
 }
 
-void GraphView::update_pix() {
+void PlotView::update_pix() {
     if (img_[ind_].isNull()) return;
 
     int vw = width() - 4;
@@ -148,7 +148,7 @@ void GraphView::update_pix() {
     setPixmap(pix_);
 }
 
-void GraphView::mousePressEvent(QMouseEvent *e) {
+void PlotView::mousePressEvent(QMouseEvent *e) {
     e->accept();
 
     if (!allow_selection_) return;
@@ -178,7 +178,7 @@ void GraphView::mousePressEvent(QMouseEvent *e) {
     py_ = y;
 }
 
-void GraphView::mouseMoveEvent(QMouseEvent *e) {
+void PlotView::mouseMoveEvent(QMouseEvent *e) {
     e->accept();
 
     if (s_ == none) return;
@@ -222,7 +222,7 @@ void GraphView::mouseMoveEvent(QMouseEvent *e) {
     emit(rangeSelected(m1_, m2_));
 }
 
-void GraphView::mouseReleaseEvent(QMouseEvent *e) {
+void PlotView::mouseReleaseEvent(QMouseEvent *e) {
     e->accept();
 
     if (e->button() == Qt::RightButton) {

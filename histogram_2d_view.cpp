@@ -24,15 +24,15 @@
 #include <QSpinBox>
 #include <QComboBox>
 
-#include "image_view2.h"
-#include "histogram.h"
+#include "histogram_2d_view.h"
+#include "histogram_calc.h"
 
 using std::isnan;
 using std::signbit;
 using std::isinf;
 
 
-ImageView2::ImageView2(QWidget *p)
+Histogram2dView::Histogram2dView(QWidget *p)
         : QLabel(p),
           hist_(nullptr), dat_(nullptr), dat_n_(0) {
     {
@@ -94,11 +94,11 @@ ImageView2::ImageView2(QWidget *p)
     }
 }
 
-ImageView2::~ImageView2() {
+Histogram2dView::~Histogram2dView() {
     delete[] hist_;
 }
 
-void ImageView2::setImage(QImage &img) {
+void Histogram2dView::setImage(QImage &img) {
     img_ = img;
 
     update_pix();
@@ -106,7 +106,7 @@ void ImageView2::setImage(QImage &img) {
     update();
 }
 
-void ImageView2::paintEvent(QPaintEvent *e) {
+void Histogram2dView::paintEvent(QPaintEvent *e) {
     QLabel::paintEvent(e);
 
     QPainter p(this);
@@ -117,13 +117,13 @@ void ImageView2::paintEvent(QPaintEvent *e) {
     }
 }
 
-void ImageView2::resizeEvent(QResizeEvent *e) {
+void Histogram2dView::resizeEvent(QResizeEvent *e) {
     QLabel::resizeEvent(e);
 
     update_pix();
 }
 
-void ImageView2::update_pix() {
+void Histogram2dView::update_pix() {
     if (img_.isNull()) return;
 
     int vw = width() - 4;
@@ -132,14 +132,14 @@ void ImageView2::update_pix() {
     setPixmap(pix_);
 }
 
-void ImageView2::setData(const unsigned char *dat, long n) {
+void Histogram2dView::setData(const unsigned char *dat, long n) {
     dat_ = dat;
     dat_n_ = n;
 
     regen_histo();
 }
 
-void ImageView2::regen_histo() {
+void Histogram2dView::regen_histo() {
     delete[] hist_;
     hist_ = nullptr;
 
@@ -149,7 +149,7 @@ void ImageView2::regen_histo() {
     parameters_changed();
 }
 
-void ImageView2::parameters_changed() {
+void Histogram2dView::parameters_changed() {
     int thresh = thresh_->value();
     float scale_factor = scale_->value();
 

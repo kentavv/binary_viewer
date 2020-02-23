@@ -17,8 +17,8 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _IMAGE_VIEW2_H_
-#define _IMAGE_VIEW2_H_
+#ifndef _HISTOGRAM_2D_VIEW_
+#define _HISTOGRAM_2D_VIEW_
 
 #include <QLabel>
 #include <QImage>
@@ -28,12 +28,12 @@ class QSpinBox;
 
 class QComboBox;
 
-class ImageView2 : public QLabel {
+class Histogram2dView : public QLabel {
 Q_OBJECT
 public:
-    explicit ImageView2(QWidget *p = nullptr);
+    explicit Histogram2dView(QWidget *p = nullptr);
 
-    ~ImageView2() override;
+    ~Histogram2dView() override;
 
 public slots:
 

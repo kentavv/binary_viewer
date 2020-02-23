@@ -22,11 +22,11 @@
 #include <QSpinBox>
 #include <QComboBox>
 
-#include "image_view3.h"
+#include "image_view.h"
 #include "bayer.h"
 
 
-ImageView3::ImageView3(QWidget *p)
+ImageView::ImageView(QWidget *p)
         : QLabel(p),
           dat_(nullptr), dat_n_(0), inverted_(true) {
     {
@@ -122,7 +122,7 @@ ImageView3::ImageView3(QWidget *p)
     }
 }
 
-void ImageView3::setImage(QImage &img) {
+void ImageView::setImage(QImage &img) {
     img_ = img;
 
     update_pix();
@@ -130,7 +130,7 @@ void ImageView3::setImage(QImage &img) {
     update();
 }
 
-void ImageView3::paintEvent(QPaintEvent *e) {
+void ImageView::paintEvent(QPaintEvent *e) {
     QLabel::paintEvent(e);
 
     QPainter p(this);
@@ -141,13 +141,13 @@ void ImageView3::paintEvent(QPaintEvent *e) {
     }
 }
 
-void ImageView3::resizeEvent(QResizeEvent *e) {
+void ImageView::resizeEvent(QResizeEvent *e) {
     QLabel::resizeEvent(e);
 
     update_pix();
 }
 
-void ImageView3::update_pix() {
+void ImageView::update_pix() {
     if (img_.isNull()) return;
 
     int vw = width() - 4;
@@ -157,18 +157,18 @@ void ImageView3::update_pix() {
 }
 
 
-void ImageView3::setData(const unsigned char *dat, long n) {
+void ImageView::setData(const unsigned char *dat, long n) {
     dat_ = dat;
     dat_n_ = n;
 
     regen_image();
 }
 
-void ImageView3::regen_image() {
+void ImageView::regen_image() {
     parameters_changed();
 }
 
-void ImageView3::parameters_changed() {
+void ImageView::parameters_changed() {
     int offset = offset_->value();
     int w = width_->value();
 

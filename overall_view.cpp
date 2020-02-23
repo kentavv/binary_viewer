@@ -22,7 +22,7 @@
 #include <QtGui>
 
 #include "hilbert.h"
-#include "image_view.h"
+#include "overall_view.h"
 
 using std::max;
 using std::min;
@@ -30,7 +30,7 @@ using std::vector;
 using std::pair;
 using std::make_pair;
 
-ImageView::ImageView(QWidget *p)
+OverallView::OverallView(QWidget *p)
         : QLabel(p),
           m1_(0.), m2_(1.), px_(-1), py_(-1), s_(none), allow_selection_(true),
           use_byte_classes_(true),
@@ -38,12 +38,12 @@ ImageView::ImageView(QWidget *p)
           dat_(nullptr), len_(0) {
 }
 
-void ImageView::enableSelection(bool v) {
+void OverallView::enableSelection(bool v) {
     allow_selection_ = v;
     update();
 }
 
-void ImageView::setImage(QImage &img) {
+void OverallView::setImage(QImage &img) {
     img_ = img;
 
     update_pix();
@@ -51,7 +51,7 @@ void ImageView::setImage(QImage &img) {
     update();
 }
 
-void ImageView::set_data(const unsigned char *dat, long len, bool reset_selection) {
+void OverallView::set_data(const unsigned char *dat, long len, bool reset_selection) {
     dat_ = dat;
     len_ = len;
 
@@ -146,7 +146,7 @@ void ImageView::set_data(const unsigned char *dat, long len, bool reset_selectio
     setImage(img);
 }
 
-void ImageView::paintEvent(QPaintEvent *e) {
+void OverallView::paintEvent(QPaintEvent *e) {
     QLabel::paintEvent(e);
 
     QPainter p(this);
@@ -166,13 +166,13 @@ void ImageView::paintEvent(QPaintEvent *e) {
     p.drawRect(0, 0, width() - 1, height() - 1);
 }
 
-void ImageView::resizeEvent(QResizeEvent *e) {
+void OverallView::resizeEvent(QResizeEvent *e) {
     QLabel::resizeEvent(e);
 
     update_pix();
 }
 
-void ImageView::update_pix() {
+void OverallView::update_pix() {
     if (img_.isNull()) return;
 
     int vw = width() - 4;
@@ -196,7 +196,7 @@ static unsigned int GrayToBinary(unsigned int num) {
     return num;
 }
 
-void ImageView::mousePressEvent(QMouseEvent *e) {
+void OverallView::mousePressEvent(QMouseEvent *e) {
     e->accept();
 
     if (e->button() == Qt::RightButton) {
@@ -236,7 +236,7 @@ void ImageView::mousePressEvent(QMouseEvent *e) {
     }
 }
 
-void ImageView::mouseMoveEvent(QMouseEvent *e) {
+void OverallView::mouseMoveEvent(QMouseEvent *e) {
     e->accept();
 
     if (s_ == none) return;
@@ -280,7 +280,7 @@ void ImageView::mouseMoveEvent(QMouseEvent *e) {
     emit(rangeSelected(m1_, m2_));
 }
 
-void ImageView::mouseReleaseEvent(QMouseEvent *e) {
+void OverallView::mouseReleaseEvent(QMouseEvent *e) {
     e->accept();
 
     if (e->button() != Qt::LeftButton) return;
