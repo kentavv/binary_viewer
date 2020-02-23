@@ -17,23 +17,23 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _IMAGE_VIEW2_H_
-#define _IMAGE_VIEW2_H_
+#ifndef _HISTOGRAM_3D_VIEW_
+#define _HISTOGRAM_3D_VIEW_
 
-#include <QLabel>
-#include <QImage>
-#include <QPixmap>
+#include <QGLWidget>
 
 class QSpinBox;
 
 class QComboBox;
 
-class ImageView2 : public QLabel {
+class QCheckBox;
+
+class Histogram3dView : public QGLWidget {
 Q_OBJECT
 public:
-    explicit ImageView2(QWidget *p = nullptr);
+    explicit Histogram3dView(QWidget *p = nullptr);
 
-    ~ImageView2() override;
+    ~Histogram3dView() override;
 
 public slots:
 
@@ -43,29 +43,28 @@ public slots:
 
 protected slots:
 
-    void setImage(QImage &img);
-
     void regen_histo();
 
 protected:
-    QImage img_;
-    QPixmap pix_;
+    void initializeGL() override;
 
-    void paintEvent(QPaintEvent *) override;
+    void resizeGL(int w, int h) override;
 
-    void resizeEvent(QResizeEvent *e) override;
+    void paintGL() override;
 
-    void update_pix();
+    void mousePressEvent(QMouseEvent *event) override;
+
+    void mouseMoveEvent(QMouseEvent *event) override;
+
+    void mouseReleaseEvent(QMouseEvent *event) override;
 
     QSpinBox *thresh_, *scale_;
     QComboBox *type_;
+    QCheckBox *overlap_;
     int *hist_;
     const unsigned char *dat_;
     long dat_n_;
-
-signals:
-
-    void rangeSelected(float, float);
+    bool spinning_;
 };
 
 #endif

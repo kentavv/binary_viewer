@@ -17,35 +17,29 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _IMAGE_VIEW3_H_
-#define _IMAGE_VIEW3_H_
+#ifndef _OVERALL_VIEW_H_
+#define _OVERALL_VIEW_H_
 
 #include <QLabel>
 #include <QImage>
 #include <QPixmap>
 
-class QSpinBox;
-
-class QComboBox;
-
-class ImageView3 : public QLabel {
+class OverallView : public QLabel {
 Q_OBJECT
 public:
-    explicit ImageView3(QWidget *p = nullptr);
+    explicit OverallView(QWidget *p = nullptr);
 
-    ~ImageView3() override = default;
+    ~OverallView() override = default;
 
 public slots:
 
-    void setData(const unsigned char *dat, long n);
-
-    void parameters_changed();
-
-protected slots:
-
     void setImage(QImage &img);
 
-    void regen_image();
+    void set_data(const unsigned char *bin, long len, bool reset_selection = true);
+
+    void enableSelection(bool);
+
+protected slots:
 
 protected:
     QImage img_;
@@ -55,41 +49,30 @@ protected:
 
     void resizeEvent(QResizeEvent *e) override;
 
+    void mousePressEvent(QMouseEvent *event) override;
+
+    void mouseMoveEvent(QMouseEvent *event) override;
+
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
     void update_pix();
 
-    typedef enum {
-        none, rgb8, rgb12, rgb16, rgba8, rgba12, rgba16, bgr8, bgr12, bgr16, bgra8, bgra12, bgra16, grey8, grey12, grey16,
-        bayer8_0,
-        bayer8_1,
-        bayer8_2,
-        bayer8_3,
-        bayer8_4,
-        bayer8_5,
-        bayer8_6,
-        bayer8_7,
-        bayer8_8,
-        bayer8_9,
-        bayer8_10,
-        bayer8_11,
-        bayer8_12,
-        bayer8_13,
-        bayer8_14,
-        bayer8_15,
-        bayer8_16,
-        bayer8_17,
-        bayer8_18,
-        bayer8_19,
-        bayer8_20,
-        bayer8_21,
-        bayer8_22,
-        bayer8_23
-    } dtype_t;
+    float m1_, m2_;
+    int px_, py_;
+    enum {
+        none, m1_moving, m2_moving, m12_moving
+    } s_;
+    bool allow_selection_;
 
-    QSpinBox *offset_, *width_;
-    QComboBox *type_;
+    bool use_byte_classes_;
+    bool use_hilbert_curve_;
+
     const unsigned char *dat_;
-    long dat_n_;
-    bool inverted_;
+    long len_;
+
+signals:
+
+    void rangeSelected(float, float);
 };
 
 #endif

@@ -17,30 +17,109 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <unistd.h>
-
 #include <QtGui>
+#include <QGridLayout>
+#include <QSpinBox>
+#include <QComboBox>
 
-#include "hilbert.h"
 #include "image_view.h"
+#include "bayer.h"
 
-using std::max;
-using std::min;
-using std::vector;
-using std::pair;
-using std::make_pair;
 
 ImageView::ImageView(QWidget *p)
         : QLabel(p),
-          m1_(0.), m2_(1.), s_(none), allow_selection_(true) {
-}
+          dat_(nullptr), dat_n_(0), inverted_(true) {
+    {
+        auto layout = new QGridLayout(this);
+        {
+            auto l = new QLabel("Offset (B)");
+            l->setFixedSize(l->sizeHint());
+            layout->addWidget(l, 0, 0);
+        }
+        {
+            auto sb = new QSpinBox;
+            sb->setFixedSize(sb->sizeHint());
+            sb->setFixedWidth(sb->width() * 1.5);
+            sb->setRange(0, 100000);
+            sb->setValue(0);
+            offset_ = sb;
+            layout->addWidget(sb, 0, 1);
+        }
+        {
+            auto l = new QLabel("Width");
+            l->setFixedSize(l->sizeHint());
+            layout->addWidget(l, 1, 0);
+        }
+        {
+            auto sb = new QSpinBox;
+            sb->setFixedSize(sb->sizeHint());
+            sb->setFixedWidth(sb->width() * 1.5);
+            sb->setRange(1, 10000);
+            sb->setValue(512);
+            width_ = sb;
+            layout->addWidget(sb, 1, 1);
+        }
+        {
+            auto l = new QLabel("Type");
+            l->setFixedSize(l->sizeHint());
+            layout->addWidget(l, 2, 0);
+        }
+        {
+            auto cb = new QComboBox;
+            cb->setFixedSize(cb->sizeHint());
+            cb->addItem("RGB 8");
+            cb->addItem("RGB 12");
+            cb->addItem("RGB 16");
+            cb->addItem("RGBA 8");
+            cb->addItem("RGBA 12");
+            cb->addItem("RGBA 16");
+            cb->addItem("BGR 8");
+            cb->addItem("BGR 12");
+            cb->addItem("BGR 16");
+            cb->addItem("BGRA 8");
+            cb->addItem("BGRA 12");
+            cb->addItem("BGRA 16");
+            cb->addItem("Grey 8");
+            cb->addItem("Grey 12");
+            cb->addItem("Grey 16");
+            cb->addItem("Bayer 8 - 0: 0 1 2 3");
+            cb->addItem("Bayer 8 - 1: 0 1 3 2");
+            cb->addItem("Bayer 8 - 2: 0 2 1 3");
+            cb->addItem("Bayer 8 - 3: 0 2 3 1");
+            cb->addItem("Bayer 8 - 4: 0 3 1 2");
+            cb->addItem("Bayer 8 - 5: 0 3 2 1");
+            cb->addItem("Bayer 8 - 6: 1 0 2 3");
+            cb->addItem("Bayer 8 - 7: 1 0 3 2");
+            cb->addItem("Bayer 8 - 8: 1 2 0 3");
+            cb->addItem("Bayer 8 - 9: 1 2 3 0");
+            cb->addItem("Bayer 8 - 10: 1 3 0 2");
+            cb->addItem("Bayer 8 - 11: 1 3 2 0");
+            cb->addItem("Bayer 8 - 12: 2 0 1 3");
+            cb->addItem("Bayer 8 - 13: 2 0 3 1");
+            cb->addItem("Bayer 8 - 14: 2 1 0 3");
+            cb->addItem("Bayer 8 - 15: 2 1 3 0");
+            cb->addItem("Bayer 8 - 16: 2 3 0 1");
+            cb->addItem("Bayer 8 - 17: 2 3 1 0");
+            cb->addItem("Bayer 8 - 18: 3 0 1 2");
+            cb->addItem("Bayer 8 - 19: 3 0 2 1");
+            cb->addItem("Bayer 8 - 20: 3 1 0 2");
+            cb->addItem("Bayer 8 - 21: 3 1 2 0");
+            cb->addItem("Bayer 8 - 22: 3 2 0 1");
+            cb->addItem("Bayer 8 - 23: 3 2 1 0");
+            cb->setCurrentIndex(0);
+            cb->setEditable(false);
+            cb->setFixedWidth(cb->width() * 1.5);
+            type_ = cb;
+            layout->addWidget(cb, 2, 1);
+        }
 
-ImageView::~ImageView() {
-}
+        layout->setColumnStretch(2, 1);
+        layout->setRowStretch(3, 1);
 
-void ImageView::enableSelection(bool v) {
-    allow_selection_ = v;
-    update();
+        QObject::connect(offset_, SIGNAL(valueChanged(int)), this, SLOT(parameters_changed()));
+        QObject::connect(width_, SIGNAL(valueChanged(int)), this, SLOT(parameters_changed()));
+        QObject::connect(type_, SIGNAL(currentIndexChanged(int)), this, SLOT(parameters_changed()));
+    }
 }
 
 void ImageView::setImage(QImage &img) {
@@ -51,186 +130,10 @@ void ImageView::setImage(QImage &img) {
     update();
 }
 
-void ImageView::set_data(const unsigned char *dat, long len) {
-    vector<pair<int, int> > hilbert;
-
-    int w = width();
-    int h = height();
-
-    m1_ = 0.;
-    m2_ = 1.;
-
-    {
-        int wh = w * h;
-
-//        printf("wxh: %d %d\n", w, h);
-
-        int h_ind = 0;
-
-        if (len <= wh) {
-            int img_w = w, img_h = len / w + 1;
-            QImage img(img_w, img_h, QImage::Format_RGB32);
-            img.fill(0);
-
-            gilbert2d(img_w, img_h, hilbert);
-
-            auto p = (unsigned int *) img.bits();
-
-#if 0
-            for (int i = 0; i < len; i++) {
-                unsigned char c = dat[i];
-                unsigned char r = 20;
-                unsigned char g = c;
-                unsigned char b = 20;
-                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-                *p++ = v;
-            }
-#else
-            for (int i = 0; i < len; i++) {
-                unsigned char c = dat[i];
-                unsigned char r, g, b;
-                if (c == 0x00) {
-                    r = 0x00;
-                    g = 0x00;
-                    b = 0x00;
-                } else if (0x00 < c && c <= 0x1f) {
-                    r = 0x00;
-                    g = 0x00;
-                    b = 0xf0;
-                } else if (0x1f < c && c <= 0x7f) {
-                    r = 0x00;
-                    g = 0xf0;
-                    b = 0x00;
-                } else if (0x7f < c && c < 0xff) {
-                    r = 0xf0;
-                    g = 0x00;
-                    b = 0x00;
-                } else if (c == 0xff) {
-                    r = 0xff;
-                    g = 0xff;
-                    b = 0xff;
-                }
-                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-#if 0
-                *p++ = v;
-#else
-                {
-                    if (h_ind >= hilbert.size()) abort();
-
-                    int x = hilbert[h_ind].first;
-                    int y = hilbert[h_ind++].second;
-                    int ind = y * w + x;
-                    if (ind < wh) {
-                        p[ind] = v;
-                    } else {
-                        abort();
-                    }
-                }
-#endif
-            }
-#endif
-//            printf("A %d %d %d %d\n", width(), height(), img.width(), img.height());
-            img = img.scaled(size());
-            setImage(img);
-        } else {
-            int sf = len / wh + 1;
-            int img_w = w, img_h = len / sf / w + 1;
-            QImage img(img_w, img_h, QImage::Format_RGB32);
-            img.fill(0);
-
-            gilbert2d(img_w, img_h, hilbert);
-
-            auto p = (unsigned int *) img.bits();
-
-#if 0
-            for (int i = 0; i < len;) {
-                unsigned char c;
-                int cn = 0;
-                int j;
-                for (j = 0; i < len && j < sf; i++, j++) {
-                    cn += dat[i];
-                }
-                c = cn / j;
-                unsigned char r = 20;
-                unsigned char g = c;
-                unsigned char b = 20;
-                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-                *p++ = v;
-            }
-#else
-            for (int i = 0; i < len;) {
-                int r = 0, g = 0, b = 0;
-                int j;
-                for (j = 0; i < len && j < sf; i++, j++) {
-                    unsigned char c = dat[i];
-                    if (c == 0x00) {
-                        r += 0x00;
-                        g += 0x00;
-                        b += 0x00;
-                    } else if (0x00 < c && c <= 0x1f) {
-                        r += 0x00;
-                        g += 0x00;
-                        b += 0xf0;
-                    } else if (0x1f < c && c <= 0x7f) {
-                        r += 0x00;
-                        g += 0xf0;
-                        b += 0x00;
-                    } else if (0x7f < c && c < 0xff) {
-                        r += 0xf0;
-                        g += 0x00;
-                        b += 0x00;
-                    } else if (c == 0xff) {
-                        r += 0xff;
-                        g += 0xff;
-                        b += 0xff;
-                    }
-                }
-
-                r = min(255, r / j) & 0xff;
-                g = min(255, g / j) & 0xff;
-                b = min(255, b / j) & 0xff;
-
-                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-#if 0
-                *p++ = v;
-#else
-                {
-                    if (h_ind >= hilbert.size()) abort();
-
-                    int x = hilbert[h_ind].first;
-                    int y = hilbert[h_ind++].second;
-                    int ind = y * w + x;
-                    if (ind < wh) {
-                        p[ind] = v;
-                    } else {
-                        abort();
-                    }
-                }
-#endif
-            }
-#endif
-//            printf("B %d %d %d %d\n", width(), height(), img.width(), img.height());
-            img = img.scaled(size());
-            setImage(img);
-        }
-    }
-}
-
 void ImageView::paintEvent(QPaintEvent *e) {
     QLabel::paintEvent(e);
 
     QPainter p(this);
-    if (allow_selection_) {
-        int ry1 = m1_ * height();
-        int ry2 = m2_ * height();
-
-        QBrush brush(QColor(128, 64, 64, 128 + 32));
-        QPen pen(brush, 5, Qt::SolidLine, Qt::RoundCap);
-        p.setPen(pen);
-        p.drawLine(0 + 3, ry1, width() - 1 - 3, ry1);
-        p.drawLine(0 + 3, ry2, width() - 1 - 3, ry2);
-    }
-
     {
         // a border around the image helps to see the border of a dark image
         p.setPen(Qt::darkGray);
@@ -251,97 +154,425 @@ void ImageView::update_pix() {
     int vh = height() - 4; // TODO BUG: With QDarkStyle, without the subtraction, the height or width of the application grows without bounds.
     pix_ = QPixmap::fromImage(img_).scaled(vw, vh); //, Qt::KeepAspectRatio);
     setPixmap(pix_);
-    printf("%d %d   %d %d   %d %d\n", vw, vh, img_.width(), img_.height(), width(), height());
 }
 
-void ImageView::mousePressEvent(QMouseEvent *e) {
-    e->accept();
 
-    if (!allow_selection_) return;
-    if (e->button() != Qt::LeftButton) return;
+void ImageView::setData(const unsigned char *dat, long n) {
+    dat_ = dat;
+    dat_n_ = n;
 
-    int x = e->pos().x();
-    int y = e->pos().y();
+    regen_image();
+}
 
-    if (x < 0) x = 0;
-    if (x > width() - 1) x = width() - 1;
-    if (y < 0) y = 0;
-    if (y > height() - 1) y = height() - 1;
+void ImageView::regen_image() {
+    parameters_changed();
+}
 
-    float yp = y / float(height());
+void ImageView::parameters_changed() {
+    int offset = offset_->value();
+    int w = width_->value();
 
-    if (yp > m1_ && (yp - m1_) < .01) {
-        s_ = m1_moving;
-    } else if (yp < m2_ && (m2_ - yp) < .01) {
-        s_ = m2_moving;
-    } else if (m1_ < yp && yp < m2_) {
-        s_ = m12_moving;
-    } else {
-        s_ = none;
+    dtype_t t;
+    QString s = type_->currentText();
+    if (s == "RGB 8") t = rgb8;
+    else if (s == "RGB 12") t = rgb12;
+    else if (s == "RGB 16") t = rgb16;
+    else if (s == "RGBA 8") t = rgba8;
+    else if (s == "RGBA 12") t = rgba12;
+    else if (s == "RGBA 16") t = rgba16;
+    else if (s == "BGR 8") t = bgr8;
+    else if (s == "BGR 12") t = bgr12;
+    else if (s == "BGR 16") t = bgr16;
+    else if (s == "BGRA 8") t = bgra8;
+    else if (s == "BGRA 12") t = bgra12;
+    else if (s == "BGRA 16") t = bgra16;
+    else if (s == "Grey 8") t = grey8;
+    else if (s == "Grey 12") t = grey12;
+    else if (s == "Grey 16") t = grey16;
+    else if (s == "Bayer 8 - 0: 0 1 2 3") t = bayer8_0;
+    else if (s == "Bayer 8 - 1: 0 1 3 2") t = bayer8_1;
+    else if (s == "Bayer 8 - 2: 0 2 1 3") t = bayer8_2;
+    else if (s == "Bayer 8 - 3: 0 2 3 1") t = bayer8_3;
+    else if (s == "Bayer 8 - 4: 0 3 1 2") t = bayer8_4;
+    else if (s == "Bayer 8 - 5: 0 3 2 1") t = bayer8_5;
+    else if (s == "Bayer 8 - 6: 1 0 2 3") t = bayer8_6;
+    else if (s == "Bayer 8 - 7: 1 0 3 2") t = bayer8_7;
+    else if (s == "Bayer 8 - 8: 1 2 0 3") t = bayer8_8;
+    else if (s == "Bayer 8 - 9: 1 2 3 0") t = bayer8_9;
+    else if (s == "Bayer 8 - 10: 1 3 0 2") t = bayer8_10;
+    else if (s == "Bayer 8 - 11: 1 3 2 0") t = bayer8_11;
+    else if (s == "Bayer 8 - 12: 2 0 1 3") t = bayer8_12;
+    else if (s == "Bayer 8 - 13: 2 0 3 1") t = bayer8_13;
+    else if (s == "Bayer 8 - 14: 2 1 0 3") t = bayer8_14;
+    else if (s == "Bayer 8 - 15: 2 1 3 0") t = bayer8_15;
+    else if (s == "Bayer 8 - 16: 2 3 0 1") t = bayer8_16;
+    else if (s == "Bayer 8 - 17: 2 3 1 0") t = bayer8_17;
+    else if (s == "Bayer 8 - 18: 3 0 1 2") t = bayer8_18;
+    else if (s == "Bayer 8 - 19: 3 0 2 1") t = bayer8_19;
+    else if (s == "Bayer 8 - 20: 3 1 0 2") t = bayer8_20;
+    else if (s == "Bayer 8 - 21: 3 1 2 0") t = bayer8_21;
+    else if (s == "Bayer 8 - 22: 3 2 0 1") t = bayer8_22;
+    else if (s == "Bayer 8 - 23: 3 2 1 0") t = bayer8_23;
+    else t = none;
+
+    QImage img;
+
+    switch (t) {
+        case rgb8: {
+            auto dat_u8 = dat_ + offset;
+            int n = (dat_n_ - offset) / 1 / 3;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = dat_u8[i * 3 + 0];
+                unsigned char g = dat_u8[i * 3 + 1];
+                unsigned char b = dat_u8[i * 3 + 2];
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case rgb12: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2 / 3;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = (dat_u16[i * 3 + 0] >> 4) & 0xff;
+                unsigned char g = (dat_u16[i * 3 + 1] >> 4) & 0xff;
+                unsigned char b = (dat_u16[i * 3 + 2] >> 4) & 0xff;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case rgb16: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2 / 3;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = (dat_u16[i * 3 + 0] >> 8) & 0xff;
+                unsigned char g = (dat_u16[i * 3 + 1] >> 8) & 0xff;
+                unsigned char b = (dat_u16[i * 3 + 2] >> 8) & 0xff;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case rgba8: {
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 1 / 4;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = dat_u8[i * 4 + 0];
+                unsigned char g = dat_u8[i * 4 + 1];
+                unsigned char b = dat_u8[i * 4 + 2];
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case rgba12: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2 / 4;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = (dat_u16[i * 4 + 0] >> 4) & 0xff;
+                unsigned char g = (dat_u16[i * 4 + 1] >> 4) & 0xff;
+                unsigned char b = (dat_u16[i * 4 + 2] >> 4) & 0xff;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case rgba16: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2 / 4;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = dat_u16[i * 4 + 0] >> 8;
+                unsigned char g = dat_u16[i * 4 + 1] >> 8;
+                unsigned char b = dat_u16[i * 4 + 2] >> 8;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case bgr8: {
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 1 / 3;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = dat_u8[i * 3 + 2];
+                unsigned char g = dat_u8[i * 3 + 1];
+                unsigned char b = dat_u8[i * 3 + 0];
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case bgr12: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2 / 3;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = (dat_u16[i * 3 + 2] >> 4) & 0xff;
+                unsigned char g = (dat_u16[i * 3 + 1] >> 4) & 0xff;
+                unsigned char b = (dat_u16[i * 3 + 0] >> 4) & 0xff;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case bgr16: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2 / 3;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = (dat_u16[i * 3 + 2] >> 8) & 0xff;
+                unsigned char g = (dat_u16[i * 3 + 1] >> 8) & 0xff;
+                unsigned char b = (dat_u16[i * 3 + 0] >> 8) & 0xff;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case bgra8: {
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 1 / 4;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = dat_u8[i * 4 + 2];
+                unsigned char g = dat_u8[i * 4 + 1];
+                unsigned char b = dat_u8[i * 4 + 0];
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case bgra12: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2 / 4;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = (dat_u16[i * 4 + 2] >> 4) & 0xff;
+                unsigned char g = (dat_u16[i * 4 + 1] >> 4) & 0xff;
+                unsigned char b = (dat_u16[i * 4 + 0] >> 4) & 0xff;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case bgra16: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2 / 4;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = (dat_u16[i * 4 + 2] >> 8) & 0xff;
+                unsigned char g = (dat_u16[i * 4 + 1] >> 8) & 0xff;
+                unsigned char b = (dat_u16[i * 4 + 0] >> 8) & 0xff;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case grey8: {
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 1;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char c = dat_u8[i];
+                unsigned char r = c;
+                unsigned char g = c;
+                unsigned char b = c;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case grey12: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char c = (dat_u16[i] >> 4) & 0xff;
+                unsigned char r = c;
+                unsigned char g = c;
+                unsigned char b = c;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case grey16: {
+            auto dat_u16 = (const unsigned short *) (dat_ + offset);
+            int n = (dat_n_ - offset) / 2;
+            img = QImage(w, n / w + 1, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char c = (dat_u16[i] >> 8) & 0xff;
+                unsigned char r = c;
+                unsigned char g = c;
+                unsigned char b = c;
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        case bayer8_0:
+        case bayer8_1:
+        case bayer8_2:
+        case bayer8_3:
+        case bayer8_4:
+        case bayer8_5:
+        case bayer8_6:
+        case bayer8_7:
+        case bayer8_8:
+        case bayer8_9:
+        case bayer8_10:
+        case bayer8_11:
+        case bayer8_12:
+        case bayer8_13:
+        case bayer8_14:
+        case bayer8_15:
+        case bayer8_16:
+        case bayer8_17:
+        case bayer8_18:
+        case bayer8_19:
+        case bayer8_20:
+        case bayer8_21:
+        case bayer8_22:
+        case bayer8_23: {
+            int h = dat_n_ / w + 1;
+            //int bayer_n = w * h;
+
+            auto dat_u8 = (const unsigned char *) (dat_ + offset);
+
+            const unsigned char *bayer = dat_u8;
+            auto rgb = new unsigned char[w * h * 3];
+            int perm = 0;
+            switch (t) {
+                case bayer8_0:
+                    perm = 0;
+                    break;
+                case bayer8_1:
+                    perm = 1;
+                    break;
+                case bayer8_2:
+                    perm = 2;
+                    break;
+                case bayer8_3:
+                    perm = 3;
+                    break;
+                case bayer8_4:
+                    perm = 4;
+                    break;
+                case bayer8_5:
+                    perm = 5;
+                    break;
+                case bayer8_6:
+                    perm = 6;
+                    break;
+                case bayer8_7:
+                    perm = 7;
+                    break;
+                case bayer8_8:
+                    perm = 8;
+                    break;
+                case bayer8_9:
+                    perm = 9;
+                    break;
+                case bayer8_10:
+                    perm = 10;
+                    break;
+                case bayer8_11:
+                    perm = 11;
+                    break;
+                case bayer8_12:
+                    perm = 12;
+                    break;
+                case bayer8_13:
+                    perm = 13;
+                    break;
+                case bayer8_14:
+                    perm = 14;
+                    break;
+                case bayer8_15:
+                    perm = 15;
+                    break;
+                case bayer8_16:
+                    perm = 16;
+                    break;
+                case bayer8_17:
+                    perm = 17;
+                    break;
+                case bayer8_18:
+                    perm = 18;
+                    break;
+                case bayer8_19:
+                    perm = 19;
+                    break;
+                case bayer8_20:
+                    perm = 20;
+                    break;
+                case bayer8_21:
+                    perm = 21;
+                    break;
+                case bayer8_22:
+                    perm = 22;
+                    break;
+                case bayer8_23:
+                    perm = 23;
+                    break;
+            }
+            bayerBG(bayer, h, w, perm, rgb);
+
+            int n = (dat_n_ - offset) / 1;
+            img = QImage(w, h, QImage::Format_RGB32);
+            img.fill(0);
+            auto p = (unsigned int *) img.bits();
+            for (int i = 0; i < n; i++) {
+                unsigned char r = rgb[i * 3 + 0];
+                unsigned char g = rgb[i * 3 + 1];
+                unsigned char b = rgb[i * 3 + 2];
+                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+                *p++ = v;
+            }
+        }
+            break;
+        default:
+            abort();
     }
 
-    px_ = x;
-    py_ = y;
-}
-
-void ImageView::mouseMoveEvent(QMouseEvent *e) {
-    e->accept();
-
-    if (s_ == none) return;
-
-    int x = e->pos().x();
-    int y = e->pos().y();
-
-    if (x < 0) x = 0;
-    if (x > width() - 1) x = width() - 1;
-    if (y < 0) y = 0;
-    if (y > height() - 1) y = height() - 1;
-
-    if (y == py_) return;
-
-    int h = height();
-
-    float m1 = m1_;
-    float m2 = m2_;
-    if (s_ == m1_moving) {
-        m1 = y / float(h);
-    } else if (s_ == m2_moving) {
-        m2 = y / float(h);
-    } else if (s_ == m12_moving) {
-        float dy = (y - py_) / float(h);
-        m1 += dy;
-        m2 += dy;
+    if (inverted_) {
+        img = img.mirrored(true);
     }
-    if (m1 >= m2_ - .01) m1 = m2_ - .01;
-    if (m1 < 0.) m1 = 0.;
-    if (m2 <= m1_ + .01) m2 = m1_ + .01;
-    if (m2 > 1.) m2 = 1.;
-
-    m1_ = m1;
-    m2_ = m2;
-
-    px_ = x;
-    py_ = y;
-
-    update();
-
-    emit(rangeSelected(m1_, m2_));
-}
-
-void ImageView::mouseReleaseEvent(QMouseEvent *e) {
-    e->accept();
-
-    if (e->button() != Qt::LeftButton) return;
-
-//    int x = e->pos().x();
-//    int y = e->pos().y();
-//
-//    if (x < 0) x = 0;
-//    if (x > width() - 1) x = width() - 1;
-//    if (y < 0) y = 0;
-//    if (y > height() - 1) y = height() - 1;
-
-    px_ = -1;
-    py_ = -1;
-    s_ = none;
+    setImage(img);
 }

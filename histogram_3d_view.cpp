@@ -27,8 +27,8 @@
 
 #include <GL/glut.h>
 
-#include "histogram.h"
-#include "view_3d.h"
+#include "histogram_calc.h"
+#include "histogram_3d_view.h"
 
 using std::isnan;
 using std::signbit;
@@ -42,7 +42,7 @@ static GLfloat *vertices = nullptr;
 static GLfloat *colors = nullptr;
 int n_vertices = 0;
 
-View3D::View3D(QWidget *p)
+Histogram3dView::Histogram3dView(QWidget *p)
         : QGLWidget(p), hist_(nullptr), dat_(nullptr), dat_n_(0), spinning_(true) {
     auto update_timer = new QTimer(this);
     QObject::connect(update_timer, SIGNAL(timeout()), this, SLOT(updateGL())); //, Qt::QueuedConnection);
@@ -127,25 +127,25 @@ View3D::View3D(QWidget *p)
     QObject::connect(overlap_, SIGNAL(toggled(bool)), this, SLOT(regen_histo()));
 }
 
-View3D::~View3D() {
+Histogram3dView::~Histogram3dView() {
     delete[] hist_;
     delete[] vertices;
     delete[] colors;
 }
 
-void View3D::setData(const unsigned char *dat, long n) {
+void Histogram3dView::setData(const unsigned char *dat, long n) {
     dat_ = dat;
     dat_n_ = n;
 
     regen_histo();
 }
 
-void View3D::initializeGL() {
+void Histogram3dView::initializeGL() {
     glClearColor(0, 0, 0, 0);
     glEnable(GL_DEPTH_TEST);
 }
 
-void View3D::resizeGL(int /*w*/, int /*h*/) {
+void Histogram3dView::resizeGL(int /*w*/, int /*h*/) {
     glMatrixMode(GL_PROJECTION);
 
     glLoadIdentity();
@@ -155,7 +155,7 @@ void View3D::resizeGL(int /*w*/, int /*h*/) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-void View3D::paintGL() {
+void Histogram3dView::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
@@ -246,7 +246,7 @@ void View3D::paintGL() {
     glFlush();
 }
 
-void View3D::regen_histo() {
+void Histogram3dView::regen_histo() {
     delete[] hist_;
     hist_ = nullptr;
 
@@ -257,7 +257,7 @@ void View3D::regen_histo() {
     parameters_changed();
 }
 
-void View3D::parameters_changed() {
+void Histogram3dView::parameters_changed() {
     int thresh = thresh_->value();
     float scale_factor = scale_->value();
 
@@ -309,15 +309,15 @@ void View3D::parameters_changed() {
     updateGL();
 }
 
-void View3D::mousePressEvent(QMouseEvent *e) {
+void Histogram3dView::mousePressEvent(QMouseEvent *e) {
     e->accept();
 }
 
-void View3D::mouseMoveEvent(QMouseEvent *e) {
+void Histogram3dView::mouseMoveEvent(QMouseEvent *e) {
     e->accept();
 }
 
-void View3D::mouseReleaseEvent(QMouseEvent *e) {
+void Histogram3dView::mouseReleaseEvent(QMouseEvent *e) {
     e->accept();
     spinning_ = !spinning_;
 }

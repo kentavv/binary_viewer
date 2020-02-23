@@ -24,22 +24,28 @@
 #include <QImage>
 #include <QPixmap>
 
+class QSpinBox;
+
+class QComboBox;
+
 class ImageView : public QLabel {
 Q_OBJECT
 public:
     explicit ImageView(QWidget *p = nullptr);
 
-    ~ImageView() override;
+    ~ImageView() override = default;
 
 public slots:
 
-    void setImage(QImage &img);
+    void setData(const unsigned char *dat, long n);
 
-    void set_data(const unsigned char *bin, long len);
-
-    void enableSelection(bool);
+    void parameters_changed();
 
 protected slots:
+
+    void setImage(QImage &img);
+
+    void regen_image();
 
 protected:
     QImage img_;
@@ -49,24 +55,41 @@ protected:
 
     void resizeEvent(QResizeEvent *e) override;
 
-    void mousePressEvent(QMouseEvent *event) override;
-
-    void mouseMoveEvent(QMouseEvent *event) override;
-
-    void mouseReleaseEvent(QMouseEvent *event) override;
-
     void update_pix();
 
-    float m1_, m2_;
-    int px_, py_;
-    enum {
-        none, m1_moving, m2_moving, m12_moving
-    } s_;
-    bool allow_selection_;
+    typedef enum {
+        none, rgb8, rgb12, rgb16, rgba8, rgba12, rgba16, bgr8, bgr12, bgr16, bgra8, bgra12, bgra16, grey8, grey12, grey16,
+        bayer8_0,
+        bayer8_1,
+        bayer8_2,
+        bayer8_3,
+        bayer8_4,
+        bayer8_5,
+        bayer8_6,
+        bayer8_7,
+        bayer8_8,
+        bayer8_9,
+        bayer8_10,
+        bayer8_11,
+        bayer8_12,
+        bayer8_13,
+        bayer8_14,
+        bayer8_15,
+        bayer8_16,
+        bayer8_17,
+        bayer8_18,
+        bayer8_19,
+        bayer8_20,
+        bayer8_21,
+        bayer8_22,
+        bayer8_23
+    } dtype_t;
 
-signals:
-
-    void rangeSelected(float, float);
+    QSpinBox *offset_, *width_;
+    QComboBox *type_;
+    const unsigned char *dat_;
+    long dat_n_;
+    bool inverted_;
 };
 
 #endif

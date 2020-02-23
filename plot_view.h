@@ -17,40 +17,39 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _VIEW_3D_H_
-#define _VIEW_3D_H_
+#ifndef _PLOT_VIEW_H_
+#define _PLOT_VIEW_H_
 
-#include <QGLWidget>
+#include <QLabel>
+#include <QImage>
+#include <QPixmap>
 
-class QSpinBox;
-
-class QComboBox;
-
-class QCheckBox;
-
-class View3D : public QGLWidget {
+class PlotView : public QLabel {
 Q_OBJECT
 public:
-    explicit View3D(QWidget *p = nullptr);
+    explicit PlotView(QWidget *p = nullptr);
 
-    ~View3D() override;
+    ~PlotView() override = default;
 
 public slots:
 
-    void setData(const unsigned char *dat, long n);
+    void setImage(int ind, QImage &img);
 
-    void parameters_changed();
+    void set_data(const float *bin, long len, bool normalize = true);
+
+    void set_data(int ind, const float *bin, long len, bool normalize = true);
+
+    void enableSelection(bool);
 
 protected slots:
 
-    void regen_histo();
-
 protected:
-    void initializeGL() override;
+    QImage img_[2];
+    QPixmap pix_;
 
-    void resizeGL(int w, int h) override;
+    void paintEvent(QPaintEvent *) override;
 
-    void paintGL() override;
+    void resizeEvent(QResizeEvent *e) override;
 
     void mousePressEvent(QMouseEvent *event) override;
 
@@ -58,13 +57,19 @@ protected:
 
     void mouseReleaseEvent(QMouseEvent *event) override;
 
-    QSpinBox *thresh_, *scale_;
-    QComboBox *type_;
-    QCheckBox *overlap_;
-    int *hist_;
-    const unsigned char *dat_;
-    long dat_n_;
-    bool spinning_;
+    void update_pix();
+
+    float m1_, m2_;
+    int px_, py_;
+    int ind_;
+    enum {
+        none, m1_moving, m2_moving, m12_moving
+    } s_;
+    bool allow_selection_;
+
+signals:
+
+    void rangeSelected(float, float);
 };
 
 #endif

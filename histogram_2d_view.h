@@ -17,55 +17,51 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _GRAPH_VIEW_H_
-#define _GRAPH_VIEW_H_
+#ifndef _HISTOGRAM_2D_VIEW_
+#define _HISTOGRAM_2D_VIEW_
 
 #include <QLabel>
 #include <QImage>
 #include <QPixmap>
 
-class GraphView : public QLabel {
+class QSpinBox;
+
+class QComboBox;
+
+class Histogram2dView : public QLabel {
 Q_OBJECT
 public:
-    explicit GraphView(QWidget *p = nullptr);
+    explicit Histogram2dView(QWidget *p = nullptr);
 
-    ~GraphView() override = default;
+    ~Histogram2dView() override;
 
 public slots:
 
-    void setImage(int ind, QImage &img);
+    void setData(const unsigned char *dat, long n);
 
-    void set_data(const float *bin, long len, bool normalize = true);
-
-    void set_data(int ind, const float *bin, long len, bool normalize = true);
-
-    void enableSelection(bool);
+    void parameters_changed();
 
 protected slots:
 
+    void setImage(QImage &img);
+
+    void regen_histo();
+
 protected:
-    QImage img_[2];
+    QImage img_;
     QPixmap pix_;
 
     void paintEvent(QPaintEvent *) override;
 
     void resizeEvent(QResizeEvent *e) override;
 
-    void mousePressEvent(QMouseEvent *event) override;
-
-    void mouseMoveEvent(QMouseEvent *event) override;
-
-    void mouseReleaseEvent(QMouseEvent *event) override;
-
     void update_pix();
 
-    float m1_, m2_;
-    int px_, py_;
-    int ind_;
-    enum {
-        none, m1_moving, m2_moving, m12_moving
-    } s_;
-    bool allow_selection_;
+    QSpinBox *thresh_, *scale_;
+    QComboBox *type_;
+    int *hist_;
+    const unsigned char *dat_;
+    long dat_n_;
 
 signals:
 

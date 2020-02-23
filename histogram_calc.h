@@ -17,8 +17,8 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _HISTOGRAM_H_
-#define _HISTOGRAM_H_
+#ifndef _HISTOGRAM_CALC_H_
+#define _HISTOGRAM_CALC_H_
 
 #include <string>
 
