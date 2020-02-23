@@ -14,7 +14,9 @@ https://sites.google.com/site/xxcantorxdustxx/home
 
 https://github.com/wapiflapi/binglide
 
-https://github.com/wapiflapi/veles
+https://github.com/codilime/veles
+
+https://github.com/radareorg/radare2
 
 
 The beginnings of Cantor.Dust was Greg Conti's work
