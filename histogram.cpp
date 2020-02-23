@@ -306,7 +306,7 @@ int *generate_histo_3d(const unsigned char *dat_u8, long n, histo_dtype_t dtype,
         }
             break;
         case u32: {
-            const unsigned int *dat_u32 = (const unsigned int *) dat_u8;
+            auto dat_u32 = (const unsigned int *) dat_u8;
             for (long i = 0; i < n / 4 - 2; i += st) {
                 int a1 = dat_u32[i + 0] / float(0xffffffff) * 255.;
                 int a2 = dat_u32[i + 1] / float(0xffffffff) * 255.;
