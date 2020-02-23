@@ -32,10 +32,10 @@ using std::make_pair;
 
 ImageView::ImageView(QWidget *p)
         : QLabel(p),
-          m1_(0.), m2_(1.), s_(none), allow_selection_(true) {
-}
-
-ImageView::~ImageView() {
+          m1_(0.), m2_(1.), px_(-1), py_(-1), s_(none), allow_selection_(true),
+          use_byte_classes_(true),
+          use_hilbert_curve_(true),
+          dat_(nullptr), len_(0) {
 }
 
 void ImageView::enableSelection(bool v) {
@@ -51,169 +51,99 @@ void ImageView::setImage(QImage &img) {
     update();
 }
 
-void ImageView::set_data(const unsigned char *dat, long len) {
-    vector<pair<int, int> > hilbert;
+void ImageView::set_data(const unsigned char *dat, long len, bool reset_selection) {
+    dat_ = dat;
+    len_ = len;
+
+    if (reset_selection) {
+        m1_ = 0.;
+        m2_ = 1.;
+    }
 
     int w = width();
     int h = height();
+    int wh = w * h;
+    int sf = len / wh + 1;
 
-    m1_ = 0.;
-    m2_ = 1.;
+    int img_w = w, img_h = len / sf / w + 1;
+    QImage img(img_w, img_h, QImage::Format_RGB32);
+    printf("%d %d   %d %d\n", w, h, img_w, img_h);
+    img.fill(0);
 
-    {
-        int wh = w * h;
+    curve_t hilbert;
+    int h_ind = 0;
+    if (use_hilbert_curve_) gilbert2d(img_w, img_h, hilbert);
 
-//        printf("wxh: %d %d\n", w, h);
+    auto p = (unsigned int *) img.bits();
 
-        int h_ind = 0;
+    for (int i = 0; i < len;) {
+        int r = 0, g = 0, b = 0;
 
-        if (len <= wh) {
-            int img_w = w, img_h = len / w + 1;
-            QImage img(img_w, img_h, QImage::Format_RGB32);
-            img.fill(0);
-
-            gilbert2d(img_w, img_h, hilbert);
-
-            auto p = (unsigned int *) img.bits();
-
-#if 0
-            for (int i = 0; i < len; i++) {
-                unsigned char c = dat[i];
-                unsigned char r = 20;
-                unsigned char g = c;
-                unsigned char b = 20;
-                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-                *p++ = v;
+        if (!use_byte_classes_) {
+            int cn = 0;
+            int j;
+            for (j = 0; i < len && j < sf; i++, j++) {
+                cn += dat[i];
             }
-#else
-            for (int i = 0; i < len; i++) {
-                unsigned char c = dat[i];
-                unsigned char r, g, b;
-                if (c == 0x00) {
-                    r = 0x00;
-                    g = 0x00;
-                    b = 0x00;
-                } else if (0x00 < c && c <= 0x1f) {
-                    r = 0x00;
-                    g = 0x00;
-                    b = 0xf0;
-                } else if (0x1f < c && c <= 0x7f) {
-                    r = 0x00;
-                    g = 0xf0;
-                    b = 0x00;
-                } else if (0x7f < c && c < 0xff) {
-                    r = 0xf0;
-                    g = 0x00;
-                    b = 0x00;
-                } else if (c == 0xff) {
-                    r = 0xff;
-                    g = 0xff;
-                    b = 0xff;
-                }
-                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-#if 0
-                *p++ = v;
-#else
-                {
-                    if (h_ind >= hilbert.size()) abort();
-
-                    int x = hilbert[h_ind].first;
-                    int y = hilbert[h_ind++].second;
-                    int ind = y * w + x;
-                    if (ind < wh) {
-                        p[ind] = v;
-                    } else {
-                        abort();
-                    }
-                }
-#endif
-            }
-#endif
-//            printf("A %d %d %d %d\n", width(), height(), img.width(), img.height());
-            img = img.scaled(size());
-            setImage(img);
+            r = 20;
+            g = cn / j;
+            b = 20;
         } else {
-            int sf = len / wh + 1;
-            int img_w = w, img_h = len / sf / w + 1;
-            QImage img(img_w, img_h, QImage::Format_RGB32);
-            img.fill(0);
-
-            gilbert2d(img_w, img_h, hilbert);
-
-            auto p = (unsigned int *) img.bits();
-
-#if 0
-            for (int i = 0; i < len;) {
-                unsigned char c;
-                int cn = 0;
-                int j;
-                for (j = 0; i < len && j < sf; i++, j++) {
-                    cn += dat[i];
+            int j;
+            for (j = 0; i < len && j < sf; i++, j++) {
+                unsigned char c = dat[i];
+                if (c == 0x00) {
+                    r += 0x00;
+                    g += 0x00;
+                    b += 0x00;
+                } else if (0x00 < c && c <= 0x1f) {
+                    r += 0x00;
+                    g += 0x00;
+                    b += 0xf0;
+                } else if (0x1f < c && c <= 0x7f) {
+                    r += 0x00;
+                    g += 0xf0;
+                    b += 0x00;
+                } else if (0x7f < c && c < 0xff) {
+                    r += 0xf0;
+                    g += 0x00;
+                    b += 0x00;
+                } else if (c == 0xff) {
+                    r += 0xff;
+                    g += 0xff;
+                    b += 0xff;
                 }
-                c = cn / j;
-                unsigned char r = 20;
-                unsigned char g = c;
-                unsigned char b = 20;
-                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-                *p++ = v;
             }
-#else
-            for (int i = 0; i < len;) {
-                int r = 0, g = 0, b = 0;
-                int j;
-                for (j = 0; i < len && j < sf; i++, j++) {
-                    unsigned char c = dat[i];
-                    if (c == 0x00) {
-                        r += 0x00;
-                        g += 0x00;
-                        b += 0x00;
-                    } else if (0x00 < c && c <= 0x1f) {
-                        r += 0x00;
-                        g += 0x00;
-                        b += 0xf0;
-                    } else if (0x1f < c && c <= 0x7f) {
-                        r += 0x00;
-                        g += 0xf0;
-                        b += 0x00;
-                    } else if (0x7f < c && c < 0xff) {
-                        r += 0xf0;
-                        g += 0x00;
-                        b += 0x00;
-                    } else if (c == 0xff) {
-                        r += 0xff;
-                        g += 0xff;
-                        b += 0xff;
-                    }
-                }
 
-                r = min(255, r / j) & 0xff;
-                g = min(255, g / j) & 0xff;
-                b = min(255, b / j) & 0xff;
+            r /= j;
+            g /= j;
+            b /= j;
+        }
 
-                unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
-#if 0
-                *p++ = v;
-#else
-                {
-                    if (h_ind >= hilbert.size()) abort();
+        r = min(255, r) & 0xff;
+        g = min(255, g) & 0xff;
+        b = min(255, b) & 0xff;
 
-                    int x = hilbert[h_ind].first;
-                    int y = hilbert[h_ind++].second;
-                    int ind = y * w + x;
-                    if (ind < wh) {
-                        p[ind] = v;
-                    } else {
-                        abort();
-                    }
-                }
-#endif
+        unsigned int v = 0xff000000 | (r << 16) | (g << 8) | (b << 0);
+
+        if (!use_hilbert_curve_) {
+            *p++ = v;
+        } else {
+            if (h_ind >= hilbert.size()) abort();
+
+            int x = hilbert[h_ind].first;
+            int y = hilbert[h_ind++].second;
+            int ind = y * w + x;
+            if (ind < wh) {
+                p[ind] = v;
+            } else {
+                abort();
             }
-#endif
-//            printf("B %d %d %d %d\n", width(), height(), img.width(), img.height());
-            img = img.scaled(size());
-            setImage(img);
         }
     }
+
+    img = img.scaled(size());
+    setImage(img);
 }
 
 void ImageView::paintEvent(QPaintEvent *e) {
@@ -231,11 +161,9 @@ void ImageView::paintEvent(QPaintEvent *e) {
         p.drawLine(0 + 3, ry2, width() - 1 - 3, ry2);
     }
 
-    {
-        // a border around the image helps to see the border of a dark image
-        p.setPen(Qt::darkGray);
-        p.drawRect(0, 0, width() - 1, height() - 1);
-    }
+    // a border around the image helps to see the border of a dark image
+    p.setPen(Qt::darkGray);
+    p.drawRect(0, 0, width() - 1, height() - 1);
 }
 
 void ImageView::resizeEvent(QResizeEvent *e) {
@@ -254,34 +182,58 @@ void ImageView::update_pix() {
     printf("%d %d   %d %d   %d %d\n", vw, vh, img_.width(), img_.height(), width(), height());
 }
 
+// Gray code related functions are from https://en.wikipedia.org/wiki/Gray_code
+static unsigned int BinaryToGray(unsigned int num) {
+    return num ^ (num >> 1);
+}
+
+static unsigned int GrayToBinary(unsigned int num) {
+    unsigned int mask = num >> 1;
+    while (mask != 0) {
+        num = num ^ mask;
+        mask = mask >> 1;
+    }
+    return num;
+}
+
 void ImageView::mousePressEvent(QMouseEvent *e) {
     e->accept();
 
-    if (!allow_selection_) return;
-    if (e->button() != Qt::LeftButton) return;
-
-    int x = e->pos().x();
-    int y = e->pos().y();
-
-    if (x < 0) x = 0;
-    if (x > width() - 1) x = width() - 1;
-    if (y < 0) y = 0;
-    if (y > height() - 1) y = height() - 1;
-
-    float yp = y / float(height());
-
-    if (yp > m1_ && (yp - m1_) < .01) {
-        s_ = m1_moving;
-    } else if (yp < m2_ && (m2_ - yp) < .01) {
-        s_ = m2_moving;
-    } else if (m1_ < yp && yp < m2_) {
-        s_ = m12_moving;
-    } else {
-        s_ = none;
+    if (e->button() == Qt::RightButton) {
+        unsigned char v = (use_byte_classes_ ? 0x02 : 0x00) | (use_hilbert_curve_ ? 0x01 : 0x00);
+        v = BinaryToGray((GrayToBinary(v) + 1) & 0x03);
+        use_byte_classes_ = v & 0x02;
+        use_hilbert_curve_ = v & 0x01;
+        set_data(dat_, len_, false);
+        return;
     }
 
-    px_ = x;
-    py_ = y;
+    if (e->button() == Qt::LeftButton) {
+        if (!allow_selection_) return;
+
+        int x = e->pos().x();
+        int y = e->pos().y();
+
+        if (x < 0) x = 0;
+        if (x > width() - 1) x = width() - 1;
+        if (y < 0) y = 0;
+        if (y > height() - 1) y = height() - 1;
+
+        float yp = y / float(height());
+
+        if (yp > m1_ && (yp - m1_) < .01) {
+            s_ = m1_moving;
+        } else if (yp < m2_ && (m2_ - yp) < .01) {
+            s_ = m2_moving;
+        } else if (m1_ < yp && yp < m2_) {
+            s_ = m12_moving;
+        } else {
+            s_ = none;
+        }
+
+        px_ = x;
+        py_ = y;
+    }
 }
 
 void ImageView::mouseMoveEvent(QMouseEvent *e) {

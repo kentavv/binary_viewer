@@ -29,13 +29,13 @@ Q_OBJECT
 public:
     explicit ImageView(QWidget *p = nullptr);
 
-    ~ImageView() override;
+    ~ImageView() override = default;
 
 public slots:
 
     void setImage(QImage &img);
 
-    void set_data(const unsigned char *bin, long len);
+    void set_data(const unsigned char *bin, long len, bool reset_selection = true);
 
     void enableSelection(bool);
 
@@ -63,6 +63,12 @@ protected:
         none, m1_moving, m2_moving, m12_moving
     } s_;
     bool allow_selection_;
+
+    bool use_byte_classes_;
+    bool use_hilbert_curve_;
+
+    const unsigned char *dat_;
+    long len_;
 
 signals:
 
