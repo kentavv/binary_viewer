@@ -2,7 +2,7 @@ Binary Viewer is a tool for binary file discovery using visualizations that may 
 
 See the project Wiki for some examples.
 
-[[https://raw.githubusercontent.com/wiki/kentavv/binary_viewer/images/view_3d_hist.png]]
+![Screenshot](https://raw.githubusercontent.com/wiki/kentavv/binary_viewer/images/view_3d_hist.png)
 
 Loosely based on Cantor.Dust, Binary Viewer was developed after seeing a demo of Cantor.Dust but receiving no response regarding availability.
 
