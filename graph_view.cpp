@@ -27,7 +27,7 @@ using std::max;
 
 GraphView::GraphView(QWidget *p)
         : QLabel(p),
-          m1_(0.), m2_(1.), ind_(0), s_(none), allow_selection_(true) {
+          m1_(0.), m2_(1.), px_(-1), py_(-1), ind_(0), s_(none), allow_selection_(true) {
 }
 
 void GraphView::enableSelection(bool v) {
