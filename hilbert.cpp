@@ -1,4 +1,23 @@
-// Based on Python code from https://github.com/jakubcerveny/gilbert/blob/master/gilbert2d.py
+/*
+ * Copyright (c) 2015, 2017, 2020 Kent A. Vander Velden, kent.vandervelden@gmail.com
+ *
+ * This file is part of BinVis.
+ *
+ *     BinVis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     BinVis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+// The gilbert2d method is based on Python code from https://github.com/jakubcerveny/gilbert/blob/master/gilbert2d.py
 
 #include <vector>
 
@@ -34,6 +53,7 @@ pair<T, T> operator-(const pair<T, T> &a) { return make_pair(-a.first, -a.second
 
 template<class T>
 pair<T, T> operator/(const pair<T, T> &a, const T &b) { return make_pair(a.first / b, a.second / b); }
+
 
 static void gilbert2d(pt_t pt, pt_t a, pt_t b, curve_t &curve) {
 //    """
@@ -96,9 +116,9 @@ static void gilbert2d(pt_t pt, pt_t a, pt_t b, curve_t &curve) {
 void gilbert2d(int width, int height, curve_t &curve) {
     curve.clear();
 
-    if (width >= height) {
-        gilbert2d(make_pair(0, 0), make_pair(width, 0), make_pair(0, height), curve);
-    } else {
-        gilbert2d(make_pair(0, 0), make_pair(0, height), make_pair(width, 0), curve);
-    }
+    pt_t pt{0, 0}, a{width, 0}, b{0, height};
+
+    if (width < height) std::swap(a, b);
+
+    gilbert2d(pt, a, b, curve);
 }
