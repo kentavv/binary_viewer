@@ -17,8 +17,6 @@
  *     along with BinVis.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <unistd.h>
-
 #include <QtGui>
 
 #include "hilbert.h"
