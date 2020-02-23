@@ -18,6 +18,8 @@ add_compile_options(-Wall -Wextra -Wno-sign-compare)
 add_executable(binary_viewer
         bayer.cpp
         bayer.h
+        binary_viewer.cpp
+        binary_viewer.h
         dot_plot.cpp
         dot_plot.h
         plot_view.cpp

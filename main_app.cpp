@@ -28,6 +28,7 @@
 #include <QPushButton>
 
 #include "main_app.h"
+#include "binary_viewer.h"
 #include "overall_view.h"
 #include "histogram_2d_view.h"
 #include "image_view.h"
@@ -96,6 +97,7 @@ MainApp::MainApp(QWidget *p)
             auto pb = new QComboBox();
             pb->addItem("3D histogram");
             pb->addItem("2D histogram");
+            pb->addItem("Binary view");
             pb->addItem("Image view");
             pb->addItem("Dot plot");
             pb->setFixedSize(pb->sizeHint());
@@ -113,11 +115,13 @@ MainApp::MainApp(QWidget *p)
     {
         histogram_3d_ = new Histogram3dView;
         histogram_2d_ = new Histogram2dView;
+        binary_viewer_ = new BinaryViewer;
         image_view_ = new ImageView;
         dot_plot_ = new DotPlot;
 
         views_.push_back(histogram_3d_);
         views_.push_back(histogram_2d_);
+        views_.push_back(binary_viewer_);
         views_.push_back(image_view_);
         views_.push_back(dot_plot_);
 
@@ -129,10 +133,7 @@ MainApp::MainApp(QWidget *p)
         top_layout->addLayout(layout, 1, 1);
     }
 
-    histogram_3d_->show();
-    histogram_2d_->hide();
-    image_view_->hide();
-    dot_plot_->hide();
+    switchView(0);
 
     setLayout(top_layout);
 }
@@ -261,6 +262,11 @@ void MainApp::update_views(bool update_iv1) {
 
     if (histogram_3d_->isVisible()) histogram_3d_->setData(bin_ + start_, end_ - start_);
     if (histogram_2d_->isVisible()) histogram_2d_->setData(bin_ + start_, end_ - start_);
+    if (binary_viewer_->isVisible()) {
+//        binary_viewer_->setData(bin_ + start_, end_ - start_);
+        binary_viewer_->setData(bin_, end_);
+        binary_viewer_->setStart(start_ / 16);
+    }
     if (image_view_->isVisible()) image_view_->setData(bin_ + start_, end_ - start_);
     if (dot_plot_->isVisible()) dot_plot_->setData(bin_ + start_, end_ - start_);
 }
