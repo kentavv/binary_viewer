@@ -22,11 +22,7 @@
 #include "hilbert.h"
 #include "overall_view.h"
 
-using std::max;
 using std::min;
-using std::vector;
-using std::pair;
-using std::make_pair;
 
 OverallView::OverallView(QWidget *p)
         : QLabel(p),
