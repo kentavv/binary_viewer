@@ -20,6 +20,7 @@ https://www.slideshare.net/dakami/dmk-blackops2006
 For more information on this and related programs for visualizing binaries see https://www.youtube.com/watch?v=C8--cXwuuFQ&list=PLUyyOw61zxiJXMihb4PjYbGHEgdGxMuY3
 
 Qt5 is required to compile Binary Viewer.
+QDarkStyleSheet (MIT License, https://github.com/ColinDuquesnoy/QDarkStyleSheet/) provides the Qt dark theme.
 
 Kent A. Vander Velden
 kent.vandervelden@gmail.com
