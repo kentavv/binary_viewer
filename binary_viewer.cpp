@@ -31,13 +31,39 @@ BinaryView::BinaryView(QWidget *p)
 }
 
 int BinaryView::rowHeight() const {
-    QFont font("Courier New", 24);
-    QFontMetrics fm(font);
+    QFontMetrics fm(font_);
 
     int fh = fm.height();
-    int fw = fm.maxWidth();
 
     return fh;
+}
+
+int BinaryView::columnStart(int c, int fw) const {
+    int x = 0;
+
+    if (c < 0) {
+        c = 5;
+    }
+
+    if (c >= 0) {
+        x += fw;
+    }
+    if (c >= 1) {
+        x += (2 + 1 + 4 + 1 + 4) * fw;
+        x += 4 * fw;
+    }
+    if (c >= 2) {
+        x += int(1.2 * fw + 2 * fw) * 16 + 2 * fw;
+        x += 4 * fw;
+    }
+    if (c >= 3) {
+        x += int(1.2 * fw + 1 * fw) * 16 + 2 * fw;
+    }
+    if (c >= 4) {
+        x += fw;
+    }
+
+    return x;
 }
 
 void BinaryView::paintEvent(QPaintEvent *e) {
@@ -48,10 +74,8 @@ void BinaryView::paintEvent(QPaintEvent *e) {
     int w = width();
     int h = height();
 
-    // If the font is changed, update rowHeight()
-    QFont font("Courier New", 24);
-    p.setFont(font);
-    QFontMetrics fm(font);
+    p.setFont(font_);
+    QFontMetrics fm(font_);
 
     int fh = fm.height();
     int fw = fm.maxWidth();
@@ -61,7 +85,7 @@ void BinaryView::paintEvent(QPaintEvent *e) {
     QPen default_pen = p.pen();
 
     for (int i = 0; i < nvis_rows; i++) {
-        int x = 10;
+        int x = columnStart(0, fw);
         int y = (i + 1) * fh;
 
         long pos = (off_ + i) * 16;
@@ -72,9 +96,7 @@ void BinaryView::paintEvent(QPaintEvent *e) {
         p.setPen(default_pen);
         p.drawText(x, y, s1);
 
-        x += (2 + 1 + 4 + 1 + 4) * fw;
-        x += 4 * fw;
-        int px = x;
+        x = columnStart(1, fw);
 
         for (int j = 0; j < 16; j++) {
             if (pos + j >= dat_n_) break;
@@ -114,8 +136,7 @@ void BinaryView::paintEvent(QPaintEvent *e) {
             p.drawText(x, y, s2);
         }
 
-        x = px + int(1.2 * fw + 2 * fw) * 16 + 2 * fw;
-        x += 4 * fw;
+        x = columnStart(2, fw);
 
         p.setPen(default_pen);
         for (int j = 0; j < 16; j++) {
@@ -137,6 +158,8 @@ void BinaryView::paintEvent(QPaintEvent *e) {
             s2 = QString("%1").arg(char(c));
             p.drawText(x, y, s2);
         }
+
+//        x = px + int(1.2 * fw + 1 * fw) * 16 + 2 * fw;
     }
 
     // a border around the image helps to see the border of a dark image
@@ -147,6 +170,15 @@ void BinaryView::paintEvent(QPaintEvent *e) {
 void BinaryView::resizeEvent(QResizeEvent *e) {
     QWidget::resizeEvent(e);
 
+    QFont font("Courier New");
+    for (int i = 48; i > 4; i--) {
+        font = QFont("Courier New", i);
+        QFontMetrics fm(font);
+        int fw = fm.maxWidth();
+        int mw = columnStart(-1, fw);
+        if (mw < width()) break;
+    }
+    font_ = font;
 }
 
 void BinaryView::setData(const unsigned char *dat, long n) {

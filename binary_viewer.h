@@ -38,13 +38,13 @@ public:
 public slots:
 
     void setData(const unsigned char *dat, long n);
+
     void setStart(int);
 
 protected slots:
 
 protected:
-    QImage img_;
-    QPixmap pix_;
+    QFont font_;
 
     void paintEvent(QPaintEvent *) override;
 
@@ -53,6 +53,8 @@ protected:
     const unsigned char *dat_;
     long dat_n_;
     int off_;
+
+    int columnStart(int c, int fw) const;
 };
 
 class BinaryViewer : public QWidget {
@@ -65,14 +67,12 @@ public:
 public slots:
 
     void setData(const unsigned char *dat, long n);
+
     void setStart(int);
 
 protected slots:
 
 protected:
-    QImage img_;
-    QPixmap pix_;
-
     void paintEvent(QPaintEvent *) override;
 
     void resizeEvent(QResizeEvent *) override;
