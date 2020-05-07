@@ -1,0 +1,7 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file>qdarkstyle/style.qrc</file>
+        <file>qdarkstyle/style.qss</file>
+    </qresource>
+</RCC>
