@@ -36,6 +36,8 @@ class Histogram3dView;
 
 class PlotView;
 
+class QComboBox;
+
 class QLabel;
 
 class MainApp : public QDialog {
@@ -68,6 +70,9 @@ protected slots:
     bool nextFile();
 
 protected:
+    QComboBox *cur_view_;
+    std::vector<QWidget *> views_;
+
     OverallView *overall_primary_;
     OverallView *overall_zoomed_;
     PlotView *plot_view_;
@@ -76,7 +81,6 @@ protected:
     ImageView *image_view_;
     DotPlot *dot_plot_;
     Histogram3dView *histogram_3d_;
-    std::vector<QWidget *> views_;
 
     QLabel *filename_;
     QStringList files_;
