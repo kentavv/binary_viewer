@@ -41,7 +41,7 @@ add_executable(binary_viewer
         version.h
         histogram_3d_view.cpp
         histogram_3d_view.h
-        bin_viewer.qrc)
+        qdarkstyle/style.qrc)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui OpenGL)
 target_link_libraries(binary_viewer Qt5::Core Qt5::Widgets Qt5::Gui Qt5::OpenGL)
