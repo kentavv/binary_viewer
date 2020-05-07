@@ -1,6 +1,6 @@
 Binary Viewer is a tool for binary file discovery using visualizations that may highlight patterns.
 
-See the project Wiki for some examples.
+See the project [Wiki](https://github.com/kentavv/binary_viewer/wiki) for some examples.
 
 ![Screenshot](https://raw.githubusercontent.com/wiki/kentavv/binary_viewer/images/view_3d_hist.png)
 
