@@ -29,6 +29,9 @@
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
+    QCoreApplication::setOrganizationName("Confluence");
+    QCoreApplication::setOrganizationDomain("confluencerd.com");
+    QCoreApplication::setApplicationName("binary_viewer");
 
 #if 1
     QFile f(":/qdarkstyle/style.qss");

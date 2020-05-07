@@ -26,6 +26,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QSettings>
 
 #include "main_app.h"
 #include "binary_viewer.h"
@@ -94,15 +95,15 @@ MainApp::MainApp(QWidget *p)
         auto layout = new QHBoxLayout;
 
         {
-            auto pb = new QComboBox();
-            pb->addItem("3D histogram");
-            pb->addItem("2D histogram");
-            pb->addItem("Binary view");
-            pb->addItem("Image view");
-            pb->addItem("Dot plot");
-            pb->setFixedSize(pb->sizeHint());
-            connect(pb, SIGNAL(currentIndexChanged(int)), SLOT(switchView(int)));
-            layout->addWidget(pb);
+            cur_view_ = new QComboBox();
+            cur_view_->addItem("3D histogram");
+            cur_view_->addItem("2D histogram");
+            cur_view_->addItem("Binary view");
+            cur_view_->addItem("Image view");
+            cur_view_->addItem("Dot plot");
+            cur_view_->setFixedSize(cur_view_->sizeHint());
+            connect(cur_view_, SIGNAL(currentIndexChanged(int)), SLOT(switchView(int)));
+            layout->addWidget(cur_view_);
         }
         {
             filename_ = new QLabel();
@@ -133,7 +134,7 @@ MainApp::MainApp(QWidget *p)
         top_layout->addLayout(layout, 1, 1);
     }
 
-    switchView(0);
+    switchView(-1);
 
     setLayout(top_layout);
 }
@@ -281,6 +282,20 @@ void MainApp::switchView(int ind) {
     for (const auto &j : views_) {
         j->hide();
     }
+
+    {
+        QSettings settings;
+        if (ind == -1) {
+            ind = settings.value("last_view", 0).toInt();
+        }
+        ind = std::max(ind, 0);
+        ind = std::min(ind, int(views_.size() - 1));
+        settings.setValue("last_view", ind);
+        cur_view_->blockSignals(true);
+        cur_view_->setCurrentIndex(ind);
+        cur_view_->blockSignals(false);
+    }
+
     views_[ind]->show();
     update_views(false);
 }
