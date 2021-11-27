@@ -13,7 +13,18 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 include_directories(.)
-add_compile_options(-Wall -Wextra -Wno-sign-compare)
+if(MSVC)
+        # Similar to -Wall -Wextra
+        add_compile_options(/W3 /WX)
+
+        # Type conversion warnings
+        add_compile_options("/wd4244") # type conversion
+        add_compile_options("/wd4305") # type truncation
+        add_compile_options("/wd4267") # type conversion, loss of data
+
+elseif(CMAKE_COMPILER_IS_GNUCXX)
+        add_compile_options(-Wall -Wextra -Wno-sign-compare)
+endif(MSVC)
 
 add_executable(binary_viewer
         bayer.cpp
@@ -46,4 +57,10 @@ add_executable(binary_viewer
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui OpenGL)
 target_link_libraries(binary_viewer Qt5::Core Qt5::Widgets Qt5::Gui Qt5::OpenGL)
 
-target_link_libraries(binary_viewer GL GLU)
+if(MSVC)
+        # On Windows the dependency is provided by the glui package
+        find_package(glui CONFIG REQUIRED)
+        target_link_libraries(binary_viewer glui::glui glui::glui_static)
+else()
+        target_link_libraries(binary_viewer GL GLU)
+endif(MSVC)
