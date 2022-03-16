@@ -42,3 +42,6 @@ CMakeLists.txt.user*
 
 binary_viewer
 
+# CMake build directory
+build
+
