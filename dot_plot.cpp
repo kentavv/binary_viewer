@@ -35,6 +35,15 @@ using std::random_shuffle;
 using std::pair;
 using std::make_pair;
 
+#if defined(_WIN32)
+// For MSVC x86, x64, and 32/64-bit ARM
+//  MSVC lacks the random() function so we will wrap rand
+//  to provide random values for these targets since this
+//  program is not providing any cryptographic functions.
+//  TODO consider replacing with <random> from C++ 11.
+long random() { return rand(); }
+#endif
+
 DotPlot::DotPlot(QWidget *p)
         : QLabel(p),
           dat_(nullptr), dat_n_(0),

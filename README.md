@@ -35,5 +35,18 @@ https://www.youtube.com/watch?v=C8--cXwuuFQ&list=PLUyyOw61zxiJXMihb4PjYbGHEgdGxM
 Qt5 is required to compile Binary Viewer.
 QDarkStyleSheet (MIT License, https://github.com/ColinDuquesnoy/QDarkStyleSheet/) provides the Qt dark theme.
 
+## Building on Windows
+
+The easiest way to get binary_viewer to build on Windows is with CMake and [vcpkg](https://vcpkg.io/en/getting-started.html). With vcpkg you can install the dependencies in way that CMake can find then automatically. For example, if you're targeting Windows 64-bit this is the command you would use to install your dependencies:
+
+    vcpkg --triplet x64-windows install "@.vcpkg_requirements.txt"
+
+QT5 takes some time to install. Once it is done, you can build using this command (update with your path to vcpkg.cmake):
+
+    mkdir build
+    pushd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=X:/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake
+    cmake --build .
+
 Kent A. Vander Velden
 kent.vandervelden@gmail.com
